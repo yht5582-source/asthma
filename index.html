@@ -1,655 +1,1208 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>氣喘 (Asthma) 臨床最佳藥物決策推導系統 | GINA Guidelines</title>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-main: #FDFBF7;
-            --bg-card: #FFFFFF;
-            --bg-subtle: #F7F4EF;
-            --border-color: #E8E2D8;
-            --primary: #D97706; /* 暖琥珀色 */
-            --primary-hover: #B45309;
-            --secondary: #E06D53; /* 暖珊瑚色 */
-            --text-main: #2D2522; /* 深暖棕色 */
-            --text-muted: #6E665F;
-            --accent-green: #2E7D32;
-            --accent-orange: #E65100;
-            --accent-orange-bg: #FFF3E0;
-            --accent-red: #C62828;
-            --accent-red-bg: #FFEBEE;
-            --shadow-sm: 0 2px 8px rgba(45, 37, 34, 0.05);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="依 GINA 2026 推導氣喘起始治療、升降階與 Track 1/Track 2 處方，評估重度氣喘生物製劑，並比對台灣健保藥品給付規定。">
+<title>氣喘治療決策台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: clinical console — masthead + numbered tabs; decision tabs = inputs (left) + sticky result (right) */
+:root{
+  --paper:#f3f6f6; --panel:#ffffff; --ink:#152224; --ink-2:#47585b; --ink-3:#788a8d; --line:#d3dddd; --line-2:#e6eded;
+  --accent:#17707f; --accent-ink:#ffffff; --accent-soft:#e0f0f2;
+  --go:#2d7a4c; --go-soft:#e2f1e7; --warn:#946708; --warn-soft:#faf0d9; --stop:#b3372b; --stop-soft:#f8e2de;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1516; --panel:#162022; --ink:#e3eced; --ink-2:#a2b2b4; --ink-3:#738588; --line:#283537; --line-2:#1e292b;
+  --accent:#6cc3d1; --accent-ink:#082226; --accent-soft:#16313a;
+  --go:#65c48b; --go-soft:#162a1f; --warn:#e4b852; --warn-soft:#2d2612; --stop:#f08a7a; --stop-soft:#381e1a; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0e1516; --panel:#162022; --ink:#e3eced; --ink-2:#a2b2b4; --ink-3:#738588; --line:#283537; --line-2:#1e292b;
+  --accent:#6cc3d1; --accent-ink:#082226; --accent-soft:#16313a;
+  --go:#65c48b; --go-soft:#162a1f; --warn:#e4b852; --warn-soft:#2d2612; --stop:#f08a7a; --stop-soft:#381e1a; color-scheme:dark }
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65}
+.wrap{max-width:1220px;margin:0 auto;padding-inline:20px;padding-block:0 56px}
+@media (max-width:520px){.wrap{padding-inline:16px}}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;font-weight:700;letter-spacing:.01em}
+h1{font-size:clamp(24px,3.2vw,32px);line-height:1.25}
+h3{font-size:16.5px}
+h4{margin:0;font-size:14px;font-weight:700}
+p{margin:0}
+.muted{color:var(--ink-2)} .small{font-size:13px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.masthead{padding-block:28px 0;display:grid;gap:8px}
+.masthead .sub{color:var(--ink-2);max-width:76ch}
+.src{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.src span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--ink-2);background:var(--panel)}
+.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{appearance:none;border:0;background:none;font:inherit;color:var(--ink-2);padding:10px 14px 11px;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;font-weight:500}
+.tab b{font-family:var(--f-mono);font-weight:500;color:var(--ink-3);margin-right:6px;font-size:13px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] b{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.pane{padding-top:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.card>h3{margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stack{display:grid;gap:16px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.field{display:grid;gap:4px;min-width:0}
+.field>label,.flabel{font-size:12.5px;color:var(--ink-2);font-weight:500}
+input[type=number],select{font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:6px 8px;min-width:0;max-width:100%}
+input[type=number]{width:96px;font-family:var(--f-mono)}
+.u{font-size:12px;color:var(--ink-3);font-family:var(--f-mono);white-space:nowrap}
+.inl{display:flex;gap:6px;align-items:center}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px;cursor:pointer;padding:3px 0}
+.check input{margin-top:5px;accent-color:var(--accent);flex:none}
+.btn{appearance:none;font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;padding:6px 12px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--paper)}
+.seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:13.5px;padding:4px 11px;border-radius:6px;color:var(--ink-2);cursor:pointer;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.pill{display:inline-block;font-size:11.5px;font-weight:500;border-radius:999px;padding:1px 9px;white-space:nowrap;vertical-align:1px}
+.pill.ev{background:var(--accent-soft);color:var(--accent)}
+.pill.go{background:var(--go-soft);color:var(--go)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.stop{background:var(--stop-soft);color:var(--stop)}
+.pill.mute{background:var(--line-2);color:var(--ink-2)}
+.sample{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:1px 10px;font-weight:500}
+.note{font-size:13px;color:var(--ink-2);border-left:3px solid var(--line);padding:4px 0 4px 12px}
+.alert{border-radius:8px;padding:10px 12px;font-size:14px;display:grid;gap:4px}
+.alert.warn{background:var(--warn-soft)} .alert.warn strong{color:var(--warn)}
+.alert.stop{background:var(--stop-soft)} .alert.stop strong{color:var(--stop)}
+.alert.go{background:var(--go-soft)} .alert.go strong{color:var(--go)}
+.alert.info{background:var(--accent-soft)} .alert.info strong{color:var(--accent)}
+.alerts{display:grid;gap:8px}
+ul.plain{margin:6px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;font-size:13.5px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;background:var(--paper);color:var(--ink-2);user-select:none}
+.chip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.bad input:checked+span{background:var(--stop);border-color:var(--stop);color:#fff}
+.chip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-weight:500;color:var(--ink-2);font-size:12.5px;white-space:nowrap}
+.tablebox{overflow-x:auto}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sticky{position:sticky;top:calc(12px + env(safe-area-inset-top,0px))}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:18px;align-items:start}
+@media (max-width:1020px){.two{grid-template-columns:minmax(0,1fr)}.sticky{position:static}}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}}
+.sub-h{font-size:12.5px;color:var(--ink-2);font-weight:500;margin:14px 0 6px}
+.sub-h:first-child{margin-top:0}
+hr.soft{border:0;border-top:1px dashed var(--line);margin:14px 0}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
-        }
+/* step result */
+.stephead{display:flex;gap:14px;align-items:center}
+.bigstep{font-family:var(--f-mono);font-size:40px;line-height:1;font-weight:500;color:var(--accent);min-width:2.4ch}
+.bigstep small{font-size:15px;color:var(--ink-3);display:block;margin-bottom:4px;letter-spacing:.06em}
+.stepbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:12px 0 4px}
+.stepbar i{height:8px;border-radius:4px;background:var(--line-2);position:relative}
+.stepbar i.on{background:var(--accent)}
+.stepbar i.from{background:transparent;box-shadow:inset 0 0 0 2px var(--ink-3)}
+.steplab{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;font-size:11.5px;color:var(--ink-3);font-family:var(--f-mono)}
+.why{margin:10px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2);display:grid;gap:3px}
+.tracks{display:grid;gap:12px}
+.trk{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.trk.pref{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.trk h4{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:15px}
+.kv{display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px 10px;font-size:13.8px;margin-top:8px}
+.kv dt{color:var(--ink-3);font-size:12.5px;padding-top:1px}
+.kv dd{margin:0}
+.dose{font-family:var(--f-mono);font-size:12.8px;background:var(--paper);border-radius:6px;padding:8px 10px;margin-top:8px;line-height:1.6}
+.opt{padding:7px 0 7px 12px;border-left:3px solid var(--line);margin-top:6px;font-size:13.8px}
+.opt.first{border-left-color:var(--go)} .opt.alt{border-left-color:var(--accent)} .opt.avoid{border-left-color:var(--stop)}
+.ctlbox{display:flex;align-items:baseline;gap:10px;margin-top:6px}
+.ctlbox b{font-family:var(--f-mono);font-size:26px;font-weight:500;line-height:1}
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding: 24px 16px;
-        }
+/* biologic */
+.biorow td:first-child{white-space:nowrap}
+.tick{font-family:var(--f-mono);font-weight:500}
+.tick.y{color:var(--go)} .tick.n{color:var(--stop)} .tick.q{color:var(--ink-3)}
+.crit{display:grid;gap:2px;font-size:13px;margin:0;padding:0;list-style:none}
+.crit li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:4px}
+.verdict{font-weight:700;font-size:13.5px}
+.verdict.y{color:var(--go)} .verdict.n{color:var(--stop)} .verdict.q{color:var(--warn)}
+.bdr{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
+.bdr .m{border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;background:var(--paper);min-width:120px}
+.bdr .m .k{font-size:12px;color:var(--ink-2)}
+.bdr .m .v{font-family:var(--f-mono);font-size:22px}
+.bdr .m.ok{border-color:var(--go);background:var(--go-soft)} .bdr .m.ok .v{color:var(--go)}
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: linear-gradient(135deg, #FFF9F2 0%, #F7ECE1 100%);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 28px 32px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .header-title-container {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 8px;
-        }
-
-        .header-icon {
-            width: 48px;
-            height: 48px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        h1 { font-size: 26px; font-weight: 700; }
-
-        .subtitle {
-            font-size: 15px;
-            color: var(--text-muted);
-            margin-left: 64px;
-        }
-
-        .sample-toolbar {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-outline {
-            background-color: var(--bg-subtle);
-            border-color: var(--border-color);
-            color: var(--text-main);
-        }
-
-        .btn-outline:hover { background-color: #EFEBE4; }
-        .btn-primary { background-color: var(--primary); color: white; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 480px 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid { grid-template-columns: 1fr; }
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .card-header {
-            border-bottom: 2px solid var(--bg-subtle);
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-title i { color: var(--primary); }
-
-        .form-group { margin-bottom: 18px; }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .form-label .helper {
-            font-size: 12px;
-            font-weight: normal;
-            color: var(--text-muted);
-            margin-left: 6px;
-        }
-
-        .radio-group, .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            background-color: var(--bg-card);
-            cursor: pointer;
-        }
-
-        .radio-option:hover { background-color: var(--bg-subtle); }
-        .radio-option input[type="radio"], .radio-option input[type="checkbox"] {
-            margin-top: 3px;
-            accent-color: var(--primary);
-        }
-
-        select.form-select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-        }
-
-        .result-header-card {
-            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
-            border: 1px solid #FCD34D;
-            border-radius: var(--radius-md);
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-
-        .step-badge-large {
-            background-color: var(--primary);
-            color: white;
-            font-size: 22px;
-            font-weight: 800;
-            padding: 12px 20px;
-            border-radius: var(--radius-md);
-            text-align: center;
-        }
-
-        .tracks-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .tracks-grid { grid-template-columns: 1fr; }
-        }
-
-        .track-card {
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background-color: var(--bg-card);
-            padding: 20px;
-            position: relative;
-        }
-
-        .track-card.preferred {
-            border-color: var(--primary);
-            background-color: #FFFCF5;
-        }
-
-        .drug-box {
-            background-color: var(--bg-subtle);
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-            font-size: 13.5px;
-            margin-bottom: 10px;
-            border-left: 3px solid var(--primary);
-        }
-
-        .clinical-explain {
-            background-color: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: var(--radius-sm);
-            padding: 14px;
-            font-size: 13px;
-            color: #334155;
-            margin-bottom: 16px;
-        }
-    </style>
+.refs{padding-left:20px;margin:0;display:grid;gap:8px;font-size:13.8px}
+.refs a{color:var(--accent)}
+.refgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:860px){.refgrid{grid-template-columns:minmax(0,1fr)}}
+.disclaimer{margin-top:22px;font-size:13px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:14px;max-width:90ch}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:13.5px;padding:8px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+.nhitbl td{font-size:13.5px}
+.nhitbl td:first-child{white-space:nowrap;font-weight:500}
+.nhitbl tr.grp td{background:var(--paper);font-weight:700;font-size:12.5px;color:var(--ink-2);letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .tabs,.noprint,.toast{display:none!important}
+  .card{border-color:#bbb;break-inside:avoid}
+  .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .sticky{position:static}
+}
+</style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div class="header-title-container">
-            <div class="header-icon"><i class="fa-solid fa-lungs"></i></div>
-            <div>
-                <h1>氣喘 (Asthma) 臨床最佳藥物決策推導系統</h1>
-            </div>
-        </div>
-        <p class="subtitle">依據 GINA 指引演算法，即時動態推導最佳階梯處方與劑量調整</p>
-    </header>
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Asthma · GINA 2026 stepwise treatment &amp; biologic decision support</div>
+    <h1>氣喘治療決策台</h1>
+    <p class="sub">依 GINA 2026 推導成人、青少年與 6–11 歲兒童的起始治療與升降階，並列出 Track 1／Track 2 處方；急性發作頁依基層與急診流程判定嚴重度、整理劑量與出院安排。治療中的病人以過去 4 週控制度評估，升階前會先檢查吸入技巧與順從性。重度氣喘頁評估生物製劑，同時比對台灣健保給付條件。</p>
+    <div class="src"><span>GINA 2026 Strategy Report</span><span>健保藥品給付規定 第六節（115.3.23 更新）</span></div>
+    <nav class="tabs" role="tablist" aria-label="功能分頁">
+      <button class="tab" role="tab" id="tab-dx" aria-controls="dx" data-t="dx"><b>1</b>診斷確認</button>
+      <button class="tab" role="tab" id="tab-tx" aria-controls="tx" data-t="tx"><b>2</b>治療階梯推導</button>
+      <button class="tab" role="tab" id="tab-acute" aria-controls="acute" data-t="acute"><b>3</b>急性發作處置</button>
+      <button class="tab" role="tab" id="tab-bio" aria-controls="bio" data-t="bio"><b>4</b>重度氣喘與生物製劑</button>
+      <button class="tab" role="tab" id="tab-nhi" aria-controls="nhi" data-t="nhi"><b>5</b>健保給付規定</button>
+      <button class="tab" role="tab" id="tab-ref" aria-controls="ref" data-t="ref"><b>6</b>劑量表與文獻</button>
+    </nav>
+  </header>
 
-    <div class="sample-toolbar">
-        <div style="font-size: 14px; font-weight: 600;">
-            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> 快速載入案例：
+  <!-- ============ 1. Diagnosis ============ -->
+  <section class="pane" id="dx" role="tabpanel" aria-labelledby="tab-dx" hidden>
+    <div class="two">
+      <div class="stack">
+        <div class="card">
+          <h3>支氣管擴張劑反應（BDR） <span class="sample" id="d-sample">示例</span></h3>
+          <div class="row">
+            <div class="field"><label for="d-pre">用藥前 FEV1</label><div class="inl"><input type="number" id="d-pre" step="0.01" min="0" value="2.10"><span class="u">L</span></div></div>
+            <div class="field"><label for="d-post">用藥後 FEV1</label><div class="inl"><input type="number" id="d-post" step="0.01" min="0" value="2.42"><span class="u">L</span></div></div>
+          </div>
+          <div class="bdr" id="d-out"></div>
+          <p class="small muted" style="margin-top:10px">陽性標準：FEV1（或 FVC）增加 ≥12% <b>且</b> ≥200 mL。GINA 2026 指出，若改用「增加 >10% 預測值」的標準，會使部分病人（特別是年輕男性）漏診。</p>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline" onclick="loadPreset('case1')">案例 1: 輕度間歇初診 (Step 1)</button>
-            <button type="button" class="btn btn-outline" onclick="loadPreset('case2')">案例 2: 輕度持續性 (Step 2)</button>
-            <button type="button" class="btn btn-outline" onclick="loadPreset('case3')">案例 3: 中度持續控制不佳 (Step 3)</button>
-            <button type="button" class="btn btn-outline" onclick="loadPreset('case4')">案例 4: 重度難治型 (Step 4-5)</button>
-            <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> 列印 / 匯出</button>
+        <div class="card">
+          <h3>尖峰呼氣流速（PEF）變異度</h3>
+          <div class="row">
+            <div class="field"><label for="d-pmax">2 週內最高 PEF</label><div class="inl"><input type="number" id="d-pmax" min="0" value="420"><span class="u">L/min</span></div></div>
+            <div class="field"><label for="d-pmin">2 週內最低 PEF</label><div class="inl"><input type="number" id="d-pmin" min="0" value="340"><span class="u">L/min</span></div></div>
+            <div class="field"><label for="d-age">年齡層</label><select id="d-age"><option value="adult">成人與青少年</option><option value="child">6–11 歲兒童</option></select></div>
+          </div>
+          <div class="bdr" id="d-pef"></div>
+          <p class="small muted" style="margin-top:10px">以 (最高−最低)／平均 計算的平均每日日夜變異度：成人 &gt;10%、兒童 &gt;13% 支持呼氣氣流變異度過大。此處以 2 週內的最高與最低值做粗估，請以每日早晚紀錄為準。</p>
         </div>
+      </div>
+      <div class="stack sticky">
+        <div class="card">
+          <h3>診斷要點</h3>
+          <ul class="plain">
+            <li><b>典型症狀型態：</b>喘鳴、呼吸短促、胸悶、咳嗽，症狀時好時壞，夜間或清晨加重，常由運動、大笑、過敏原、冷空氣或病毒感染誘發。</li>
+            <li><b>記錄可變的呼氣氣流受限：</b>BDR 陽性、PEF 變異度過大、治療 4 週後肺功能明顯改善、運動誘發試驗或支氣管激發試驗陽性。</li>
+            <li><b>FeNO：</b>升高可支持開始 ICS，但 FeNO 低不能用來排除氣喘或不給 ICS（例如肥胖成人常被誤判為非嗜酸性）。</li>
+            <li><b>開始治療前</b>盡量先做肺功能，並把診斷依據寫進病歷。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>已經在用 ICS 的病人</h3>
+          <ul class="plain">
+            <li>症狀與氣流變異度都已記錄 → 診斷成立，評估控制度。</li>
+            <li>有症狀但肺功能正常 → 在症狀發作時或停用支氣管擴張劑後重測 BDR，或考慮激發試驗。</li>
+            <li>症狀少且肺功能正常 → 可考慮在密切追蹤下降低 ICS 劑量（約 25–50%），2–4 週後再評估。不要在急性發作後或懷孕期間做。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>鑑別診斷</h3>
+          <p class="small muted">成人：COPD、心衰竭、聲帶功能異常（誘發性喉阻塞）、過度換氣、支氣管擴張症、藥物性咳嗽（ACE 抑制劑）、中央氣道阻塞、肺栓塞、間質性肺病。兒童：慢性上呼吸道咳嗽、異物吸入、囊性纖維化、原發性纖毛運動障礙、先天性心臟病、支氣管肺發育不全。</p>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="main-grid">
-        <!-- 表單區域 -->
-        <div class="left-col">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fa-solid fa-sliders"></i> 病人必要評估參數</div>
-                </div>
-                <form id="asthmaForm">
-                    <!-- 1. 年齡分組 -->
-                    <div class="form-group">
-                        <label class="form-label">1. 病人年齡分組</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="ageGroup" value="adult" checked onchange="calculateTherapy()"> 成人與青少年 (≥ 12 歲)
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="ageGroup" value="child611" onchange="calculateTherapy()"> 學齡兒童 (6 – 11 歲)
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 2. 評估情境 -->
-                    <div class="form-group">
-                        <label class="form-label">2. 評估情境</label>
-                        <select class="form-select" id="evalContext" onchange="calculateTherapy()">
-                            <option value="initial">初診未使用控制藥物 (Initial Assessment)</option>
-                            <option value="maintenance">現正接受治療，評估控制度 (On Maintenance)</option>
-                        </select>
-                    </div>
-
-                    <!-- 3. 日間氣喘症狀頻率 -->
-                    <div class="form-group">
-                        <label class="form-label">3. 日間氣喘症狀頻率</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="daytimeSym" value="less_2_month" checked onchange="calculateTherapy()"> 每月少於 2 次 (< 2 times/month)
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="daytimeSym" value="two_month_to_weekly" onchange="calculateTherapy()"> 每月 ≥ 2 次，但非每天
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="daytimeSym" value="most_days" onchange="calculateTherapy()"> 幾乎每天有症狀 (Most days)
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="daytimeSym" value="severe_daily" onchange="calculateTherapy()"> 每日持續症狀，且嚴重影響生活/肺功能低
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 4. 夜間甦醒頻率 -->
-                    <div class="form-group">
-                        <label class="form-label">4. 夜間甦醒頻率</label>
-                        <div class="radio-group">
-                            <label class="radio-option"><input type="radio" name="nightWaking" value="none" checked onchange="calculateTherapy()"> 無夜間甦醒</label>
-                            <label class="radio-option"><input type="radio" name="nightWaking" value="less_weekly" onchange="calculateTherapy()"> < 1 次/週</label>
-                            <label class="radio-option"><input type="radio" name="nightWaking" value="weekly_plus" onchange="calculateTherapy()"> ≥ 1 次/週</label>
-                        </div>
-                    </div>
-
-                    <!-- 5. 過去 12 個月急性發作史 -->
-                    <div class="form-group">
-                        <label class="form-label">5. 過去 12 個月急性發作史</label>
-                        <select class="form-select" id="exacerbations" onchange="calculateTherapy()">
-                            <option value="0">0 次</option>
-                            <option value="1">1 次 (需要口服類固醇 OCS)</option>
-                            <option value="2+">≥ 2 次 (重度發作/急診/住院)</option>
-                        </select>
-                    </div>
-
-                    <!-- 6. 肺功能測試 -->
-                    <div class="form-group">
-                        <label class="form-label">6. 肺功能測試 (FEV1 % Predicted)</label>
-                        <select class="form-select" id="fev1" onchange="calculateTherapy()">
-                            <option value="normal">正常或 > 80% predicted</option>
-                            <option value="mild_low">60% – 80% predicted</option>
-                            <option value="severe_low">< 60% predicted</option>
-                        </select>
-                    </div>
-
-                    <!-- 7. 生物標記與 Type 2 免疫表型 -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            7. 生物標記與 Type 2 免疫表型 (Biomarkers)
-                            <span class="helper">(難治型/重度氣喘評估)</span>
-                        </label>
-                        <div class="checkbox-group">
-                            <label class="radio-option">
-                                <input type="checkbox" id="bm_eos" onchange="calculateTherapy()">
-                                <div class="option-text">
-                                    血中嗜酸性白血球 (Blood Eosinophils ≥ 150-300 /μL)
-                                </div>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" id="bm_feno" onchange="calculateTherapy()">
-                                <div class="option-text">
-                                    呼氣一氧化氮升高 (FeNO ≥ 20-25 ppb)
-                                </div>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" id="bm_ige" onchange="calculateTherapy()">
-                                <div class="option-text">
-                                    吸入性過敏原感作 / 總 IgE 升高 (Allergic Phenotype)
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
+  <!-- ============ 2. Treatment steps ============ -->
+  <section class="pane" id="tx" role="tabpanel" aria-labelledby="tab-tx" hidden>
+    <div class="two">
+      <div class="stack">
+        <div class="card">
+          <h3>病人基本資料 <span class="sample" id="t-sample">示例個案，請改成實際資料</span></h3>
+          <div class="sub-h">年齡層</div>
+          <div class="seg" id="t-age" role="group" aria-label="年齡層">
+            <button data-v="adult">≥18 歲成人</button><button data-v="adol">12–17 歲青少年</button><button data-v="child">6–11 歲兒童</button>
+          </div>
+          <p class="small muted" style="margin-top:6px">5 歲以下兒童的診斷與治療另有流程（GINA 第 10–12 章），本工具未涵蓋。</p>
+          <div class="sub-h">評估情境</div>
+          <div class="seg" id="t-ctx" role="group" aria-label="評估情境">
+            <button data-v="init">初診：尚未使用 ICS</button><button data-v="maint">治療中：評估控制度與調整</button>
+          </div>
         </div>
 
-        <!-- 結果區域 -->
-        <div class="right-col">
-            <div class="result-header-card">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div class="step-badge-large" id="stepBadge">Step 1</div>
-                        <div>
-                            <h2 id="stepTitle" style="font-size: 20px; color: #78350F;">建議處方階梯：Step 1</h2>
-                            <p id="stepSubtitle" style="font-size: 14px; color: #92400E;">每月症狀 <2 次，低急性發作風險</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 臨床異同說明提示 -->
-            <div class="clinical-explain" id="clinicalNote">
-                <i class="fa-solid fa-lightbulb" style="color: #D97706; margin-right: 6px;"></i>
-                <span id="clinicalNoteText"><b>臨床指引觀念說明：</b> GINA Track 1 (首選策略) 將 Step 1 與 Step 2 合併為同一藥物建議：按需要使用低劑量 ICS-Formoterol。</span>
-            </div>
-
-            <!-- 雙軌處方比較 -->
-            <div class="tracks-grid">
-                <div class="track-card preferred">
-                    <div style="font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">
-                        <i class="fa-solid fa-star"></i> Track 1: ICS-Formoterol (首選)
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;" id="t1Desc">以抗發炎鎮痛劑為緩解劑 (MART)，發作時直接兼具抗發炎與擴張效果。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">緩解用藥 (Reliever)：</div>
-                    <div class="drug-box" id="t1Reliever">按需要使用低劑量 ICS-Formoterol (160/4.5 mcg 1 口 PRN)。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">保養用藥 (Controller)：</div>
-                    <div class="drug-box" id="t1Controller">不需要每日固定保養用藥，發作時按需吸入。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">代表處方與劑量：</div>
-                    <div class="drug-box" style="background:#FFF8EB;" id="t1Example">Symbicort 160/4.5 mcg: PRN 吸入 1 口。</div>
-                </div>
-
-                <div class="track-card">
-                    <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">
-                        <i class="fa-solid fa-notes-medical"></i> Track 2: SABA + ICS (替代)
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;" id="t2Desc">當無法使用 Track 1 時，每日固定使用 ICS，發作時吸入 SABA。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">緩解用藥 (Reliever)：</div>
-                    <div class="drug-box" id="t2Reliever">按需要使用 SABA (Salbutamol 100 mcg 1-2 口 PRN)。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">保養用藥 (Controller)：</div>
-                    <div class="drug-box" id="t2Controller">每次吸入 SABA 時同時吸入低劑量 ICS。</div>
-                    <div style="font-weight:700; font-size:13px; margin-top:8px;">代表處方與劑量：</div>
-                    <div class="drug-box" style="background:#F3F4F6;" id="t2Example">Flixotide 50 mcg PRN + Ventolin PRN。</div>
-                </div>
-            </div>
-
-            <!-- Step 5 生物製劑評估區 -->
-            <div id="severeAsthmaSection" class="card" style="display: none; border-color: #F59E0B; background-color: #FFFDF5;">
-                <div class="card-header" style="border-bottom-color: #FDE68A;">
-                    <div class="card-title" style="color: #B45309;">
-                        <i class="fa-solid fa-dna"></i> Step 5: 重度難治型氣喘與生物製劑 (Biologics) 評估
-                    </div>
-                </div>
-                <p style="font-size: 13.5px; margin-bottom: 12px; color: #78350F;">
-                    針對 Step 4 治療後仍無法控制、一年內發生 ≥2 次需要 OCS 之嚴重急性發作病人，建議轉介氣喘專科醫師進行生物標記測試，考慮以下標靶治療：
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 13px;" id="biologicList">
-                    <!-- 動態帶入 -->
-                </div>
-            </div>
+        <!-- initial -->
+        <div class="card" id="t-init">
+          <h3>初診時的症狀</h3>
+          <div class="sub-h">白天氣喘症狀</div>
+          <div class="seg" id="t-days" role="group" aria-label="白天症狀頻率">
+            <button data-v="2">≤ 2 天/週</button><button data-v="3" id="t-days3">3 天/週</button><button data-v="most" id="t-daysmost">≥ 4 天/週（大多數日子）</button><button data-v="daily">每天</button>
+          </div>
+          <div class="sub-h">其他</div>
+          <label class="check"><input type="checkbox" id="t-night"><span>因氣喘夜間醒來 ≥1 次/週</span></label>
+          <label class="check"><input type="checkbox" id="t-rexac"><span>近期有急性發作</span></label>
+          <label class="check"><input type="checkbox" id="t-acute"><span>這次就診正逢急性發作（初次表現即為發作）</span></label>
+          <div class="row" style="margin-top:8px">
+            <div class="field"><label for="t-fev1">FEV1（未測可留空）</label><div class="inl"><input type="number" id="t-fev1" min="10" max="150"><span class="u">% 預測值</span></div></div>
+          </div>
+          <p class="small muted" style="margin-top:6px">本工具以 FEV1 &lt;60% 預測值作為「肺功能低」（對應 GINA 風險因子中的 FEV1 &lt;60%）；60–79% 視為輕度下降。</p>
         </div>
+
+        <!-- maintenance -->
+        <div class="card" id="t-maint">
+          <h3>目前的治療</h3>
+          <div class="row">
+            <div class="field" id="t-trackwrap"><label for="t-track">緩解藥策略</label>
+              <select id="t-track"><option value="t1">Track 1：ICS-formoterol 緩解</option><option value="t2">Track 2：ICS-SABA 或 SABA 緩解</option></select></div>
+            <div class="field"><label for="t-step">目前階梯</label><select id="t-step"></select></div>
+            <div class="field" id="t-c1wrap"><label for="t-c1">Step 1 用的是</label>
+              <select id="t-c1"><option value="icsform">按需 ICS-formoterol</option><option value="combo">按需 ICS-SABA 複方</option><option value="sep">用 SABA 時另吸 ICS</option></select></div>
+          </div>
+          <div class="sub-h">過去 4 週的症狀控制</div>
+          <label class="check"><input type="checkbox" id="c-day"><span>白天症狀 &gt;2 次/週</span></label>
+          <label class="check"><input type="checkbox" id="c-night"><span>曾因氣喘夜間醒來</span></label>
+          <label class="check"><input type="checkbox" id="c-rel"><span>需要 SABA 緩解 &gt;2 次/週（不含運動前預防用；ICS-formoterol 緩解不列入）</span></label>
+          <label class="check"><input type="checkbox" id="c-act"><span>活動因氣喘受限</span></label>
+          <div class="ctlbox"><b id="c-n">0</b><span id="c-lvl" class="pill go">控制良好</span></div>
+          <div class="sub-h">急性發作與肺功能</div>
+          <div class="row">
+            <div class="field"><label for="t-exac">過去 12 個月需全身性類固醇的發作</label><div class="inl"><input type="number" id="t-exac" min="0" max="20" step="1"><span class="u">次</span></div></div>
+            <div class="field"><label for="t-mfev1">FEV1</label><div class="inl"><input type="number" id="t-mfev1" min="10" max="150"><span class="u">% 預測值</span></div></div>
+            <div class="field"><label for="t-stable">已維持控制良好</label><div class="inl"><input type="number" id="t-stable" min="0" max="60" step="1"><span class="u">個月</span></div></div>
+          </div>
+          <div class="sub-h">升階前檢查（未勾選的項目要先處理）</div>
+          <div id="t-checks"></div>
+        </div>
+
+        <div class="card">
+          <h3>急性發作風險因子</h3>
+          <div class="chips" id="t-risk"></div>
+          <p class="small muted" style="margin-top:8px">即使症狀很少，這些因子仍會增加急性發作的風險。</p>
+        </div>
+      </div>
+
+      <div class="stack sticky">
+        <div class="card" id="t-result" aria-live="polite">
+          <div class="stephead">
+            <div class="bigstep"><small>STEP</small><span id="r-step">3</span></div>
+            <div style="min-width:0">
+              <h3 id="r-title">—</h3>
+              <p class="small muted" id="r-sub"></p>
+            </div>
+          </div>
+          <div class="stepbar" id="r-bar"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="steplab"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <ul class="why" id="r-why"></ul>
+          <div class="alerts" id="r-alerts" style="margin-top:12px"></div>
+        </div>
+        <div class="card" id="r-tracks-card">
+          <h3 id="r-tracks-h">建議處方</h3>
+          <div class="tracks" id="r-tracks"></div>
+          <div id="r-other" style="margin-top:10px"></div>
+        </div>
+        <div class="card noprint">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <p class="small muted">可複製為病歷摘要，或列印成一頁。</p>
+            <div class="row"><button class="btn" id="r-copy">複製病歷摘要</button><button class="btn primary" onclick="window.print()">列印</button></div>
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <!-- ============ 3. Acute exacerbation ============ -->
+  <section class="pane" id="acute" role="tabpanel" aria-labelledby="tab-acute" hidden>
+    <div class="alert stop noprint" style="margin-bottom:16px"><strong>急症優先</strong><span class="small">先處置、同時評估。本頁協助判定嚴重度與整理劑量，不能延誤治療。涵蓋 6 歲以上；5 歲以下兒童另有流程（GINA Box 12-5、12-7）。</span></div>
+    <div class="two">
+      <div class="stack">
+        <div class="card">
+          <h3>就診情境 <span class="sample" id="a-sample">示例個案，請改成實際資料</span></h3>
+          <div class="sub-h">場所</div>
+          <div class="seg" id="a-set" role="group" aria-label="就診場所"><button data-v="pc">基層診所</button><button data-v="ed">急診／急性照護</button></div>
+          <div class="sub-h">年齡層</div>
+          <div class="seg" id="a-age" role="group" aria-label="年齡層"><button data-v="adult">≥18 歲</button><button data-v="adol">12–17 歲</button><button data-v="child">6–11 歲</button></div>
+          <div class="row" style="margin-top:10px">
+            <div class="field"><label for="a-wt">體重</label><div class="inl"><input type="number" id="a-wt" min="10" max="250"><span class="u">kg</span></div></div>
+          </div>
+          <label class="check" style="margin-top:6px"><input type="checkbox" id="a-ana"><span>同時有全身性過敏反應（anaphylaxis）的表現</span></label>
+        </div>
+        <div class="card">
+          <h3>嚴重度評估</h3>
+          <div class="sub-h">危及生命的徵象</div>
+          <div class="chips" id="a-life"></div>
+          <div class="sub-h">說話與姿勢</div>
+          <div class="seg" id="a-speech" role="group" aria-label="說話與姿勢"><button data-v="sent">說完整句子，可平躺</button><button data-v="phr">只能說片語，偏好坐著</button><button data-v="unable">無法說話、喝水或平躺</button></div>
+          <div class="grid2" style="margin-top:12px">
+            <div class="field"><label for="a-spo2">SpO2（室內空氣）</label><div class="inl"><input type="number" id="a-spo2" min="50" max="100"><span class="u">%</span></div></div>
+            <div class="field"><label for="a-rr">呼吸速率</label><div class="inl"><input type="number" id="a-rr" min="5" max="80"><span class="u">/min</span></div></div>
+            <div class="field"><label for="a-pef">PEF 或 FEV1</label><div class="inl"><input type="number" id="a-pef" min="5" max="150"><span class="u">% 個人最佳／預測值</span></div></div>
+            <div class="field" id="a-pramwrap"><label for="a-pram">PRAM 分數（&lt;18 歲）</label><div class="inl"><input type="number" id="a-pram" min="0" max="12"><span class="u">/12</span></div></div>
+          </div>
+          <div class="sub-h">其他中度徵象</div>
+          <div class="chips" id="a-mod"></div>
+          <p class="small muted" style="margin-top:8px">SpO2 &lt;92% 屬重度；&lt;90% 需積極治療。深色皮膚者在低血氧時 SpO2 可能高估；高海拔需調整目標。</p>
+        </div>
+        <div class="card">
+          <h3>病史</h3>
+          <div class="sub-h">致死性氣喘高風險因子（GINA Box 9-1）</div>
+          <div class="chips" id="a-red"></div>
+          <div class="row" style="margin-top:12px">
+            <div class="field"><label for="a-maint">發作前的維持治療</label>
+              <select id="a-maint"><option value="none">未使用含 ICS 的藥物</option><option value="t1">ICS-formoterol（AIR 或 MART）</option><option value="t2">ICS 或 ICS-LABA＋SABA 緩解</option></select></div>
+          </div>
+          <label class="check" style="margin-top:6px"><input type="checkbox" id="a-prior"><span>過去 12 個月已有 ≥1 次需 OCS 或緊急就醫的發作</span></label>
+          <label class="check"><input type="checkbox" id="a-icu"><span>這次需要加護病房</span></label>
+        </div>
+        <div class="card">
+          <h3>1 小時後再評估</h3>
+          <div class="seg" id="a-resp" role="group" aria-label="治療反應"><button data-v="na">尚未評估</button><button data-v="marked">明顯改善</button><button data-v="partial">部分改善</button><button data-v="worse">惡化或沒有改善</button></div>
+          <div id="a-afterbox">
+            <div class="sub-h">出院條件</div>
+            <label class="check"><input type="checkbox" id="a-mildafter"><span>症狀與徵象已達「輕度」標準，且距最後一次 salbutamol 已 1–2 小時</span></label>
+            <label class="check"><input type="checkbox" id="a-home"><span>家中照顧資源足夠，可以追蹤</span></label>
+            <div class="row" style="margin-top:6px">
+              <div class="field"><label for="a-spo2b">SpO2（室內空氣）</label><div class="inl"><input type="number" id="a-spo2b" min="50" max="100"><span class="u">%</span></div></div>
+              <div class="field"><label for="a-pefb">PEF 或 FEV1</label><div class="inl"><input type="number" id="a-pefb" min="5" max="150"><span class="u">%</span></div></div>
+            </div>
+            <div id="a-admitbox">
+              <div class="sub-h">住院考量（急診）</div>
+              <label class="check"><input type="checkbox" id="a-q12"><span>仍需每 1–2 小時使用 SABA</span></label>
+              <label class="check"><input type="checkbox" id="a-dysp"><span>給全身性類固醇 4–6 小時後仍持續喘</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stack sticky">
+        <div class="card" aria-live="polite">
+          <div class="stephead">
+            <div style="min-width:0">
+              <div class="eyebrow">嚴重度</div>
+              <h3 id="ar-sev" style="font-size:22px;margin-top:2px">—</h3>
+            </div>
+          </div>
+          <ul class="why" id="ar-why"></ul>
+          <div class="alerts" id="ar-alerts" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h3 id="ar-txh">立即處置</h3>
+          <div id="ar-tx"></div>
+          <div class="dose" id="ar-ocs" style="margin-top:12px"></div>
+          <p class="small muted" style="margin-top:8px">Salbutamol 每噴 100 mcg，ipratropium 每噴 20 mcg。經 spacer 一次噴一下；太喘無法閉氣時改用潮氣呼吸，每噴前都要搖勻。</p>
+        </div>
+        <div class="card" id="ar-dispo-card">
+          <h3 id="ar-dispoh">處置去向</h3>
+          <div class="alerts" id="ar-dispo"></div>
+        </div>
+        <div class="card" id="ar-dc-card">
+          <h3>出院安排 <span class="pill ev" id="ar-dcbox">Box 9-5</span></h3>
+          <ul class="plain" id="ar-dc"></ul>
+        </div>
+        <div class="card">
+          <h3>不建議</h3>
+          <ul class="plain small">
+            <li>鎮靜安眠藥：會抑制呼吸，與可避免的氣喘死亡有關，必須避免。</li>
+            <li>常規抗生素：除非有明確肺部感染證據（發燒加膿痰，或影像顯示肺炎）。</li>
+            <li>Aminophylline、theophylline 靜脈注射：效果差且副作用大。</li>
+            <li>常規靜脈 β2 促效劑、霧化鎂；常規胸部 X 光（懷疑氣胸、肺炎、異物或其他心肺問題時才照）。</li>
+            <li>動脈血氧不需常規做：PEF 或 FEV1 &lt;50%、對初始治療無反應或惡化時再考慮。</li>
+          </ul>
+        </div>
+        <div class="card noprint">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <p class="small muted">複製急診或門診紀錄摘要。</p>
+            <button class="btn" id="ar-copy">複製摘要</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. Severe asthma & biologics ============ -->
+  <section class="pane" id="bio" role="tabpanel" aria-labelledby="tab-bio" hidden>
+    <div class="two">
+      <div class="stack">
+        <div class="card">
+          <h3>確認是重度氣喘，而非難治型 <span class="sample" id="b-sample">示例個案，請改成實際資料</span></h3>
+          <p class="small muted">GINA 定義：重度氣喘是指在矯正可調整因子後，使用高劑量 ICS-LABA 仍控制不良，或必須用到高劑量才能維持控制。</p>
+          <div id="b-dtt" style="margin-top:6px"></div>
+        </div>
+        <div class="card">
+          <h3>病人資料</h3>
+          <div class="grid3">
+            <div class="field"><label for="b-age">年齡</label><div class="inl"><input type="number" id="b-age" min="6" max="100"><span class="u">歲</span></div></div>
+            <div class="field"><label for="b-wt">體重</label><div class="inl"><input type="number" id="b-wt" min="10" max="250"><span class="u">kg</span></div></div>
+            <div class="field"><label for="b-smoke">吸菸</label><select id="b-smoke"><option value="no">不吸菸</option><option value="quit">正積極戒菸</option><option value="cur">目前吸菸</option></select></div>
+          </div>
+          <div class="sub-h">過去 12 個月急性發作</div>
+          <div class="row">
+            <div class="field"><label for="b-exac">需全身性類固醇的發作</label><div class="inl"><input type="number" id="b-exac" min="0" max="30"><span class="u">次</span></div></div>
+          </div>
+          <label class="check"><input type="checkbox" id="b-er"><span>其中至少 1 次需急診或住院</span></label>
+          <div class="sub-h">維持性口服類固醇</div>
+          <div class="row">
+            <div class="field"><label for="b-ocs">Prednisolone（或等效）</label><div class="inl"><input type="number" id="b-ocs" min="0" max="80" step="0.5"><span class="u">mg/日</span></div></div>
+            <div class="field"><label for="b-ocsm">已持續</label><div class="inl"><input type="number" id="b-ocsm" min="0" max="240"><span class="u">個月</span></div></div>
+          </div>
+          <div class="sub-h">過去 4 週控制（健保 omalizumab 需符合 ≥2 項）</div>
+          <div class="chips" id="b-ctl"></div>
+          <div class="sub-h">健保文件條件</div>
+          <label class="check"><input type="checkbox" id="b-spec"><span>由胸腔、過敏免疫或兒科專科醫師診斷為重度氣喘</span></label>
+          <label class="check"><input type="checkbox" id="b-hics"><span>已用高劑量 ICS（成人 BDP &gt;800 mcg/日；青少年、兒童 &gt;400 mcg/日或等效）併用 LABA 等其他控制藥，仍控制不良</span></label>
+          <label class="check"><input type="checkbox" id="b-rev"><span>病歷已證實氣喘：FEV1 可逆性 &gt;12% 且 &gt;200 mL，或使用類固醇後 FEV1 增加 &gt;20%</span></label>
+        </div>
+        <div class="card">
+          <h3>Type 2 發炎指標</h3>
+          <div class="grid3">
+            <div class="field"><label for="b-eos">血中嗜酸性白血球（12 個月內最高）</label><div class="inl"><input type="number" id="b-eos" min="0" max="20000"><span class="u">/μL</span></div></div>
+            <div class="field"><label for="b-feno">FeNO</label><div class="inl"><input type="number" id="b-feno" min="0" max="300"><span class="u">ppb</span></div></div>
+            <div class="field"><label for="b-ige">總 IgE</label><div class="inl"><input type="number" id="b-ige" min="0" max="10000"><span class="u">IU/mL</span></div></div>
+          </div>
+          <div class="sub-h">臨床特徵與共病</div>
+          <div class="chips" id="b-feat"></div>
+          <p class="small muted" style="margin-top:8px">Eos 與 FeNO 會受 OCS 抑制，也有日夜變化。在認定沒有 Type 2 發炎之前，可重複檢測最多 3 次（氣喘惡化時、給 OCS 前，或停 OCS 1–2 週後／最低劑量時）。</p>
+        </div>
+      </div>
+      <div class="stack sticky">
+        <div class="card" aria-live="polite">
+          <h3>評估摘要</h3>
+          <div class="alerts" id="b-sum"></div>
+        </div>
+        <div class="card">
+          <h3>GINA 2026 生物製劑選擇 <span class="pill ev">Box 8-4</span></h3>
+          <div class="tablebox"><table><thead><tr><th>類別</th><th>典型條件</th><th>反應預測因子</th></tr></thead><tbody id="b-gina"></tbody></table></div>
+          <p class="small muted" style="margin-top:8px">符合者擇一使用，至少試用 4 個月（depemokimab 為 6 個月）再評估。反應不佳時考慮換成另一類 Type 2 標靶藥物。</p>
+        </div>
+        <div class="card">
+          <h3>健保給付條件比對 <span class="pill ev">第六節</span></h3>
+          <div class="tablebox"><table><thead><tr><th>藥物</th><th>條件</th></tr></thead><tbody id="b-nhi"></tbody></table></div>
+          <p class="small muted" style="margin-top:8px">均需事前審查。「最適切的標準療法」在條文中指符合 GINA Step 5 的規範。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. NHI ============ -->
+  <section class="pane" id="nhi" role="tabpanel" aria-labelledby="tab-nhi" hidden>
+    <div class="stack">
+      <div class="card">
+        <h3>健保藥品給付規定：氣喘相關條文摘要</h3>
+        <p class="small muted">整理自中央健康保險署「最新版藥品給付規定內容（分章節）」第六節 呼吸道藥物（115.3.23 更新）。此表為重點摘要，申請與審查請以原條文為準。</p>
+        <div class="tablebox" style="margin-top:10px"><table class="nhitbl"><thead><tr><th>條文／藥物</th><th>給付條件</th><th>用量限制與評估</th></tr></thead><tbody>
+          <tr class="grp"><td colspan="3">吸入劑（6.1）</td></tr>
+          <tr><td>成人 SABA</td><td>有症狀時使用，一般每日不超過 4–6 次；不建議長期規則使用。</td><td>每 28 天不得超過 1 支。</td></tr>
+          <tr><td>成人 LABA</td><td>每日 1–2 次，治療氣喘時<b>限與 ICS 合併使用</b>。</td><td>—</td></tr>
+          <tr><td>低劑量 ICS-formoterol</td><td>輕度氣喘可用於有症狀或急性發作時的緩解；中度與重度可用於每日維持加緩解（MART）。</td><td>輕度、中度每 28 天至多 1 支；重度至多 2 支，病歷需記載發作與控制狀況並註明上次取藥日。兒童：輕、中度每 28 天至多 1 支。</td></tr>
+          <tr><td>成人 ICS</td><td>依最新版 GINA 指引的劑量；少數控制不佳者可增至 BDP（CFC）&gt;1000 mcg/日或等效。</td><td>每 28 天最多 2 瓶，註明上次取藥日期。</td></tr>
+          <tr><td>兒童 SABA（MDI）</td><td>需要時才使用，不建議長期規則使用。</td><td>每日最多 6 次（puffs），每 28 天最多 100 次。</td></tr>
+          <tr><td>兒童 ICS</td><td>需要時應規則使用，依 GINA 控制評估調整。</td><td>每 28 天 1–2 瓶。</td></tr>
+          <tr><td>Trelegy Ellipta<br><span class="small muted">FF/UMEC/VI</span></td><td>併用 ICS-LABA 仍控制不佳的<b>成人</b>氣喘維持治療。</td><td>每 28 天 1 盒（30 劑）；不得與中／高劑量 ICS-LABA 固定劑量複方併用。</td></tr>
+          <tr><td>Trimbow<br><span class="small muted">BDP/FORM/GLY</span></td><td>併用 ICS-LABA 仍控制不佳，且<b>過去一年至少 1 次急性惡化</b>的成人氣喘維持治療（115/3/1）。</td><td>每 28 天 1 盒（120 劑）。</td></tr>
+          <tr><td>Enerzair Breezhaler<br><span class="small muted">IND/GLY/MF</span></td><td>併用 ICS-LABA 仍控制不佳，且<b>過去一年至少 1 次急性惡化</b>的成人氣喘維持治療。</td><td>每 28 天 1 盒。</td></tr>
+          <tr><td>Breztri Aerosphere<br><span class="small muted">BUD/GLY/FORM</span></td><td><b>僅給付 COPD</b>（GINA 2026 已列為氣喘 Step 5 選項，但健保未給付氣喘）。</td><td>—</td></tr>
+          <tr class="grp"><td colspan="3">白三烯素拮抗劑（6.2.4、6.2.5）</td></tr>
+          <tr><td>Montelukast</td><td>6 歲以上輕度至中度持續性氣喘；病歷需記載上個月發作次數、頻率及 PEFR 變化。4 mg 咀嚼錠限 2 歲以上未滿 6 歲，顆粒限 6 個月以上未滿 6 歲。</td><td>每日 1 粒（包）。開立時需告知精神神經副作用風險。</td></tr>
+          <tr class="grp"><td colspan="3">生物製劑（均需事前審查）</td></tr>
+          <tr><td>Omalizumab<br><span class="small muted">6.2.6 · Xolair</span></td><td>≥12 歲或 6–12 歲「重度持續性氣喘」，由胸腔內科、小兒科或過敏免疫專科診斷；12 歲以上需不吸菸或正積極戒菸。皮膚或血清過敏原檢測陽性；總 IgE 30–1300 IU/mL；已用高劑量 ICS（成人 BDP &gt;800、青少年與兒童 &gt;400 mcg/日）併用其他控制藥仍控制不良，且過去 4 週控制 4 項中 ≥2 項不佳；病歷證實 FEV1 可逆性 &gt;12% 且 &gt;200 mL，或類固醇後 FEV1 增加 &gt;20%。</td><td>每月不得超過 2 次；16 週後評估，症狀確實改善才可續用（每日症狀或 PEFR 改善、類固醇用量減少、急診或住院減少）。</td></tr>
+          <tr><td>Mepolizumab<br><span class="small muted">6.2.8 · Nucala</span></td><td><b>≥6 歲</b>嚴重嗜酸性氣喘且控制不良，由胸腔（含兒童）或過敏免疫（含兒童）專科診斷。投藥前 12 個月內 Eos ≥300/μL；已用 GINA Step 5 最適切療法；持續 prednisolone ≥5 mg/日（≥18 歲過去 3 個月、6–17 歲過去 1 個月）；過去 12 個月 ≥2 次需全身性類固醇的發作，其中 ≥1 次急診或住院。</td><td>每 4 週不得超過 1 次；32 週後評估，惡化次數減少才可續用。</td></tr>
+          <tr><td>Benralizumab<br><span class="small muted">6.2.8 · Fasenra</span></td><td>同 mepolizumab，但限 <b>≥18 歲</b>。</td><td>第 0、4、8 週各 1 次，之後每 8 週不得超過 1 次；32 週後評估。</td></tr>
+          <tr><td>Dupilumab<br><span class="small muted">6.2.9 · Dupixent</span></td><td><b>≥12 歲</b>嚴重嗜酸性表現型氣喘且控制不良，由胸腔、過敏免疫或兒科專科診斷。投藥前 12 個月內 Eos ≥300/μL；已用最適切療法；持續 prednisolone ≥5 mg/日（≥18 歲過去 6 個月、12–17 歲過去 1–3 個月）；過去 12 個月 ≥2 次需全身性類固醇的發作，其中 ≥1 次急診或住院。</td><td>OCS 依賴、合併中重度異位性皮膚炎或慢性鼻竇炎合併鼻息肉：600 mg 起始，之後 300 mg 每 2 週；其他：400 mg 起始，之後 200 mg 每 2 週。32 週後評估；不得併用其他氣喘生物製劑。</td></tr>
+          <tr><td>Tezepelumab<br><span class="small muted">6.2.10 · Tezspire</span></td><td><b>≥18 歲</b>嚴重氣喘且控制不良，由胸腔或過敏免疫專科診斷；已用最適切療法；過去 12 個月 ≥2 次需全身性類固醇的發作，其中 ≥1 次急診或住院。<b>不要求</b> Eos 或 OCS。</td><td>每 4 週不得超過 1 次；32 週後評估。</td></tr>
+          <tr><td>Depemokimab、Reslizumab</td><td>第六節未列給付條文。</td><td>—</td></tr>
+        </tbody></table></div>
+        <p class="small muted" style="margin-top:10px">「惡化」在條文中定義為必須使用口服或全身性類固醇、住院或急診治療的氣喘惡化。健保的生物製劑條件（Eos ≥300 加上 OCS 依賴）比 GINA 的典型條件嚴格許多；不符健保條件時，可能仍符合 GINA 的臨床適應，需自費或另行評估。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. Dose table & references ============ -->
+  <section class="pane" id="ref" role="tabpanel" aria-labelledby="tab-ref" hidden>
+    <div class="refgrid">
+      <div class="card">
+        <h3>ICS 每日總劑量：低、中、高</h3>
+        <p class="small muted">依 GINA 2026 Box 4-2 整理的常用品項，以計量劑量（metered dose）表示。<b>這不是等效換算表</b>，換藥後仍需觀察穩定度。</p>
+        <div class="tablebox" style="margin-top:8px"><table>
+          <thead><tr><th>成人與青少年（mcg/日）</th><th>低</th><th>中</th><th>高</th></tr></thead>
+          <tbody class="mono">
+            <tr><td style="font-family:var(--f-body)">Beclometasone（標準微粒 pMDI）</td><td>200–500</td><td>&gt;500–1000</td><td>&gt;1000</td></tr>
+            <tr><td style="font-family:var(--f-body)">Beclometasone（超細微粒）</td><td>100–200</td><td>&gt;200–400</td><td>&gt;400</td></tr>
+            <tr><td style="font-family:var(--f-body)">Budesonide（DPI 或 pMDI）</td><td>200–400</td><td>&gt;400–800</td><td>&gt;800</td></tr>
+            <tr><td style="font-family:var(--f-body)">Ciclesonide</td><td>80–160</td><td>&gt;160–320</td><td>&gt;320</td></tr>
+            <tr><td style="font-family:var(--f-body)">Fluticasone furoate（DPI）</td><td>100</td><td>—</td><td>200</td></tr>
+            <tr><td style="font-family:var(--f-body)">Fluticasone propionate</td><td>100–250</td><td>&gt;250–500</td><td>&gt;500</td></tr>
+          </tbody>
+          <thead><tr><th>6–11 歲兒童（mcg/日）</th><th>低</th><th>中</th><th>高</th></tr></thead>
+          <tbody class="mono">
+            <tr><td style="font-family:var(--f-body)">Beclometasone（標準微粒 pMDI）</td><td>100–200</td><td>&gt;200–400</td><td>&gt;400</td></tr>
+            <tr><td style="font-family:var(--f-body)">Beclometasone（超細微粒 pMDI）</td><td>50–100</td><td>&gt;100–200</td><td>&gt;200</td></tr>
+            <tr><td style="font-family:var(--f-body)">Budesonide（DPI 或 pMDI）</td><td>100–200</td><td>&gt;200–400</td><td>&gt;400</td></tr>
+            <tr><td style="font-family:var(--f-body)">Budesonide（霧化懸液）</td><td>250–500</td><td>&gt;500–1000</td><td>&gt;1000</td></tr>
+            <tr><td style="font-family:var(--f-body)">Ciclesonide</td><td>80</td><td>&gt;80–160</td><td>&gt;160</td></tr>
+            <tr><td style="font-family:var(--f-body)">Fluticasone furoate（DPI）</td><td>50</td><td>—</td><td>—</td></tr>
+            <tr><td style="font-family:var(--f-body)">Fluticasone propionate</td><td>50–100</td><td>&gt;100–200</td><td>&gt;200</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <h3>Track 1 ICS-formoterol 用法</h3>
+        <div class="tablebox"><table>
+          <thead><tr><th>年齡</th><th>劑型</th><th>Step 1–2</th><th>Step 3</th><th>Step 4–5</th></tr></thead>
+          <tbody>
+            <tr><td>成人、青少年</td><td>Budesonide-formoterol 160/4.5（計量 200/6），或 BDP-formoterol 100/6</td><td>需要時 1 吸</td><td>1 吸 BID（或 QD）＋需要時 1 吸</td><td>2 吸 BID＋需要時 1 吸</td></tr>
+            <tr><td>6–11 歲</td><td>Budesonide-formoterol 80/4.5（計量 100/6），或 BDP-formoterol 100/6</td><td>需要時 1 吸</td><td>1 吸 QD＋需要時 1 吸</td><td>Step 4：1 吸 BID＋需要時 1 吸；Step 5 不建議 MART</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="plain small" style="margin-top:10px">
+          <li>24 小時內總吸數（維持加緩解）成人與青少年 &gt;12 吸、兒童 &gt;8 吸，應就醫。</li>
+          <li>Budesonide-formoterol 320/9 與 BDP-formoterol 200/6 不可作為緩解藥。</li>
+          <li>ICS-formoterol 不可與「非 formoterol 的 ICS-LABA」搭配作為緩解藥。</li>
+          <li>Track 2 的 ICS-SABA（budesonide-albuterol 80/90，每次 2 吸）一天最多 6 次，超過應就醫。</li>
+          <li>pMDI 懸浮劑型每次噴之前都要立即搖勻。</li>
+        </ul>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>參考文獻</h3>
+        <ol class="refs">
+          <li>Global Initiative for Asthma. <i>Global Strategy for Asthma Management and Prevention, 2026 update.</i> <a href="https://ginasthma.org/2026-gina-strategy-report/" target="_blank" rel="noopener">ginasthma.org</a>（Box 2-2、4-2、4-4、4-6、4-8、4-10、4-12、4-13、8-3、8-4、9-1、9-4、9-5、9-6、9-7）</li>
+          <li>衛生福利部中央健康保險署。最新版藥品給付規定內容（分章節）：第六節 呼吸道藥物（115.3.23 更新）。<a href="https://www.nhi.gov.tw/ch/cp-7593-ad2a9-3397-1.html" target="_blank" rel="noopener">nhi.gov.tw</a></li>
+          <li>Beasley R, et al. Controlled trial of budesonide–formoterol as needed for mild asthma (Novel START). <i>N Engl J Med</i> 2019;380:2020–2030.</li>
+          <li>LaForce C, et al. As-needed albuterol–budesonide in mild asthma (BATURA). <i>N Engl J Med</i> 2025;393:113–124.</li>
+          <li>Hatter L, et al. Budesonide–formoterol versus salbutamol as reliever therapy in children with mild asthma (CARE). <i>Lancet</i> 2025;406:1473–1483.</li>
+          <li>Papi A, et al. Albuterol–budesonide fixed-dose combination rescue inhaler for asthma (MANDALA). <i>N Engl J Med</i> 2022;386:2071–2083.</li>
+          <li>Bisgaard H, et al. Budesonide/formoterol maintenance plus reliever therapy in children. <i>Chest</i> 2006;130:1733–1743.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="disclaimer">本工具為臨床決策輔助與教學用途，不能取代醫師對個別病人的完整評估，包括病史、理學檢查、肺功能判讀、吸入技巧確認與共病評估。急性發作、低血氧或呼吸窘迫應依急症流程處置。藥物劑量與適應症請以仿單、院內處方集與最新健保條文為準；品牌名稱僅為舉例，台灣是否上市或院內是否有藥請自行確認。版本：GINA 2026、健保第六節 115.3.23；本頁更新於 2026-10-03。</p>
+  </section>
 </div>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
-    function calculateTherapy() {
-        const ageGroup = document.querySelector('input[name="ageGroup"]:checked').value;
-        const evalContext = document.getElementById('evalContext').value;
-        const daytimeSym = document.querySelector('input[name="daytimeSym"]:checked').value;
-        const nightWaking = document.querySelector('input[name="nightWaking"]:checked').value;
-        const exacerbations = document.getElementById('exacerbations').value;
-        const fev1 = document.getElementById('fev1').value;
+/*ENGINE-START*/
+const AE=(()=>{
+const AGE={adult:'≥18 歲成人',adol:'12–17 歲青少年',child:'6–11 歲兒童'};
+const num=v=>(v===''||v==null||isNaN(+v))?null:+v;
+const lowLF=f=>num(f)!=null&&num(f)<60;
+const isChild=a=>a==='child';
 
-        const bmEos = document.getElementById('bm_eos').checked;
-        const bmFeno = document.getElementById('bm_feno').checked;
-        const bmIge = document.getElementById('bm_ige').checked;
+/* GINA Box 2-2A: symptom control in the past 4 weeks */
+function control(c){
+  const n=['day','night','rel','act'].filter(k=>c&&c[k]).length;
+  return {n,level:n===0?'well':n<=2?'partly':'un',label:n===0?'控制良好':n<=2?'部分控制':'未控制'};
+}
 
-        let step = 1;
-        if (daytimeSym === 'severe_daily' || exacerbations === '2+' || (evalContext === 'maintenance' && (bmEos || bmFeno || bmIge))) {
-            if (exacerbations === '2+' || fev1 === 'severe_low' || (evalContext === 'maintenance' && (bmEos || bmFeno || bmIge))) {
-                step = 5;
-            } else {
-                step = 4;
-            }
-        } else if (daytimeSym === 'most_days' || nightWaking === 'weekly_plus' || exacerbations === '1') {
-            step = 3;
-        } else if (daytimeSym === 'two_month_to_weekly' || nightWaking === 'less_weekly') {
-            step = 2;
-        } else {
-            step = 1;
-        }
+/* GINA Box 4-4 (adults/adolescents) and Box 4-10 (children 6–11): initial treatment */
+function initial(i){
+  const why=[];let row;
+  const lf=lowLF(i.fev1);
+  if(i.acute){row=5;why.push('初次表現即為急性發作');}
+  else if((i.days==='daily'||i.night)&&(lf||i.recentExac)){
+    row=4;
+    why.push(i.days==='daily'?'每天都有症狀':'夜間醒來 ≥1 次/週');
+    if(i.days==='daily'&&i.night)why.push('夜間醒來 ≥1 次/週');
+    if(lf)why.push('FEV1 '+num(i.fev1)+'% 預測值（肺功能低）');
+    if(i.recentExac)why.push('近期有急性發作');
+  }
+  else if(i.days==='most'||i.days==='daily'||i.night||lf){
+    row=3;
+    if(i.days==='daily')why.push('每天都有症狀，但無肺功能低或近期發作');
+    else if(i.days==='most')why.push('大多數日子有症狀');
+    if(i.night)why.push('夜間醒來 ≥1 次/週');
+    if(lf)why.push('FEV1 '+num(i.fev1)+'% 預測值（肺功能低）');
+  }
+  else if(i.days==='3'){row=2;why.push(isChild(i.age)?'症狀 3–4 天/週':'症狀約 3 天/週');why.push('肺功能正常或輕度下降');}
+  else {row=1;why.push('症狀 ≤2 天/週，無夜間醒來');why.push('肺功能未明顯下降');}
+  if(row<5&&i.recentExac&&row<4)why.push('近期有急性發作：屬風險因子，優先選含 ICS 的緩解藥');
+  const step=isChild(i.age)?[0,1,2,3,4,3][row]:[0,1,2,3,4,4][row];
+  return {row,step,why};
+}
 
-        const stepBadge = document.getElementById('stepBadge');
-        const stepTitle = document.getElementById('stepTitle');
-        const stepSubtitle = document.getElementById('stepSubtitle');
-        const clinicalNoteText = document.getElementById('clinicalNoteText');
-
-        const t1Reliever = document.getElementById('t1Reliever');
-        const t1Controller = document.getElementById('t1Controller');
-        const t1Example = document.getElementById('t1Example');
-
-        const t2Reliever = document.getElementById('t2Reliever');
-        const t2Controller = document.getElementById('t2Controller');
-        const t2Example = document.getElementById('t2Example');
-
-        const severeSection = document.getElementById('severeAsthmaSection');
-        const biologicList = document.getElementById('biologicList');
-
-        if (step === 1) {
-            stepBadge.innerText = "Step 1";
-            stepTitle.innerText = "建議處方階梯：Step 1 (輕度間歇性)";
-            stepSubtitle.innerText = "每月症狀 < 2 次，近一年無重大發作史";
-            clinicalNoteText.innerHTML = "<b>說明：為何 Step 1 與 Step 2 藥物建議相同？</b><br>在 GINA 指引 Track 1 (首選策略) 中，Step 1 與 Step 2 合併為『按需要低劑量 ICS-Formoterol』。即使症狀次數微增，Track 1 無需增加每日固定藥物，發作時直接吸入 ICS-Formoterol 即可兼具保養與急救。但 Track 2 在 Step 2 需改為『每日固定吸入低劑量 ICS』。";
-
-            t1Reliever.innerText = "按需要使用低劑量 ICS-Formoterol (如 Budesonide/Formoterol 160/4.5 mcg 1 口 PRN)。";
-            t1Controller.innerText = "無須每日固定吸入保養。";
-            t1Example.innerText = "Symbicort 160/4.5 mcg: 發作時吸入 1 口 (PRN)。";
-
-            t2Reliever.innerText = "按需要使用 SABA (Ventolin 100 mcg 1-2 口 PRN)。";
-            t2Controller.innerText = "每當吸入 SABA 時，同時吸入低劑量 ICS。";
-            t2Example.innerText = "Flixotide 50 mcg (隨 SABA 使用) + Ventolin PRN。";
-            severeSection.style.display = "none";
-
-        } else if (step === 2) {
-            stepBadge.innerText = "Step 2";
-            stepTitle.innerText = "建議處方階梯：Step 2 (輕度持續性)";
-            stepSubtitle.innerText = "每月症狀 ≥ 2 次，但非每天發作";
-            clinicalNoteText.innerHTML = "<b>說明：Step 1 vs Step 2 差異比較</b><br>• <b>Track 1 (首選)</b>：藥物與 Step 1 完全相同（按需要 ICS-Formoterol），兼具方便性與防護力。<br>• <b>Track 2 (替代)</b>：從 Step 1 的『發作時順便吸 ICS』調升為<b>『每日固定使用低劑量 ICS 保養』</b>。";
-
-            t1Reliever.innerText = "按需要使用低劑量 ICS-Formoterol (如 Budesonide/Formoterol 160/4.5 mcg 1 口 PRN)。";
-            t1Controller.innerText = "無須每日固定吸入保養（依發作頻率按需吸入即可）。";
-            t1Example.innerText = "Symbicort 160/4.5 mcg: 發作時吸入 1 口 (PRN)。";
-
-            t2Reliever.innerText = "按需要使用 SABA (Ventolin 100 mcg 1-2 口 PRN)。";
-            t2Controller.innerText = "【劑量調升】每日固定使用低劑量 ICS (如 Flixotide 50-100 mcg 早晚各 1 口)。";
-            t2Example.innerText = "Flixotide 100 mcg 每日 2 次固定保養 + Ventolin PRN。";
-            severeSection.style.display = "none";
-
-        } else if (step === 3) {
-            stepBadge.innerText = "Step 3";
-            stepTitle.innerText = "建議處方階梯：Step 3 (中度持續性)";
-            stepSubtitle.innerText = "幾乎每天有症狀、夜間醒來或過去一年曾發作 1 次";
-            clinicalNoteText.innerHTML = "<b>說明：Step 2 -> Step 3 藥物調升亮點</b><br>• <b>Track 1</b>：進入 <b>MART 療法</b>（單一吸入器維持與急救），開始加入<b>每日固定保養（每日 1-2 口）</b> + 發作加吸。<br>• <b>Track 2</b>：調升為<b>『低劑量 ICS-LABA 複方保養』</b>。";
-
-            t1Reliever.innerText = "按需要使用低劑量 ICS-Formoterol 做急救緩解。";
-            t1Controller.innerText = "【劑量調升】低劑量 ICS-Formoterol MART (每日固定早晚各 1 口保養 + 發作加吸)。";
-            t1Example.innerText = "Symbicort 160/4.5 mcg: 早晚各 1 口保養 + 發作時 1 口 PRN。";
-
-            t2Reliever.innerText = "按需要使用 SABA (Ventolin PRN)。";
-            t2Controller.innerText = "【劑量調升】每日固定使用低劑量 ICS-LABA 複方保養。";
-            t2Example.innerText = "Seretide 100/50 mcg 每日 2 次 或 Relvar 92/22 mcg 每日 1 次 + Ventolin PRN。";
-            severeSection.style.display = "none";
-
-        } else if (step === 4) {
-            stepBadge.innerText = "Step 4";
-            stepTitle.innerText = "建議處方階梯：Step 4 (中重度持續性)";
-            stepSubtitle.innerText = "每日持續症狀、肺功能下降或近期有急性發作";
-            clinicalNoteText.innerHTML = "<b>說明：Step 3 -> Step 4 藥物調升亮點</b><br>• <b>Track 1</b>：成分維持 ICS-Formoterol，但保養劑量調升為<b>『中劑量 MART (每日固定 4 口)』</b>。<br>• <b>Track 2</b>：保養劑量調升為<b>『中/高劑量 ICS-LABA 複方』</b>。";
-
-            t1Reliever.innerText = "按需要使用低劑量 ICS-Formoterol 做急救緩解。";
-            t1Controller.innerText = "【劑量調升】中劑量 ICS-Formoterol MART (每日固定早晚各 2 口保養 + 發作加吸)。";
-            t1Example.innerText = "Symbicort 160/4.5 mcg: 早晚各 2 口保養 (每日共4口) + 發作時 PRN。";
-
-            t2Reliever.innerText = "按需要使用 SABA (Ventolin PRN)。";
-            t2Controller.innerText = "【劑量調升】每日固定使用中/高劑量 ICS-LABA 複方。";
-            t2Example.innerText = "Seretide 250/50 mcg 每日 2 次 或 Foster 100/6 mcg 早晚各 2 口 + Ventolin PRN。";
-            severeSection.style.display = "none";
-
-        } else if (step === 5) {
-            stepBadge.innerText = "Step 5";
-            stepTitle.innerText = "建議處方階梯：Step 5 (重度難治型氣喘)";
-            stepSubtitle.innerText = "高劑量治療仍無法控制，或頻繁重度發作 (≥2次/年)";
-            clinicalNoteText.innerHTML = "<b>說明：Step 4 -> Step 5 藥物調升亮點</b><br>加用 <b>LAMA (如 Tiotropium) 三合一療法</b>，並轉介專科評估 <b>Type 2 生物製劑標靶治療</b>（如 Anti-IL5, Anti-IgE, Anti-IL4R/TSLP）。";
-
-            t1Reliever.innerText = "按需要使用 ICS-Formoterol PRN。";
-            t1Controller.innerText = "【處方升階】高劑量 ICS-LABA + 加用 LAMA (三合一) + 生物製劑標靶。";
-            t1Example.innerText = "Enerzair Breezhaler (ICS/LABA/LAMA) 每日 1 次 + 專科生物製劑。";
-
-            t2Reliever.innerText = "按需要使用 SABA PRN。";
-            t2Controller.innerText = "【處方升階】高劑量 ICS-LABA + LAMA ± 短期口服類固醇 (OCS)。";
-            t2Example.innerText = "Trelegy / Spiriva + 生物製劑評估。";
-
-            // 帶入 Step 5 生物標記對應
-            severeSection.style.display = "block";
-            let bioHtml = "";
-            if (bmEos) {
-                bioHtml += `<div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #FCD34D;">
-                    <strong>Anti-IL5 / Anti-IL5R 標靶</strong>
-                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">• Mepolizumab (Nucala)<br>• Benralizumab (Fasenra)<br>適合嗜酸性白血球 (Eos ≥150-300)</div>
-                </div>`;
-            }
-            if (bmIge) {
-                bioHtml += `<div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #FCD34D;">
-                    <strong>Anti-IgE 抗體標靶</strong>
-                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">• Omalizumab (Xolair)<br>適合重度過敏性氣喘、血清 IgE 升高</div>
-                </div>`;
-            }
-            if (bmFeno || bmEos) {
-                bioHtml += `<div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #FCD34D;">
-                    <strong>Anti-IL4R / Anti-TSLP 標靶</strong>
-                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">• Dupilumab (Dupixent) (IL-4R)<br>• Tezepelumab (Tezspire) (TSLP)<br>適合 FeNO 升高或 Type 2 發炎表型</div>
-                </div>`;
-            }
-            if (!bmEos && !bmIge && !bmFeno) {
-                bioHtml = `<div style="grid-column: 1 / -1; background: white; padding: 10px; border-radius: 6px; border: 1px dashed #FCD34D;">
-                    請於左側勾選『7. 生物標記與 Type 2 免疫表型』，系統將即時精準推導對應之生物製劑 (Anti-IL5, Anti-IgE, Anti-IL4R)。
-                </div>`;
-            }
-            biologicList.innerHTML = bioHtml;
-        }
+/* Ongoing treatment: GINA Box 4-6 / 4-12 cycle and Box 4-13 step-down */
+function ongoing(m){
+  const ctl=control(m.ctl);
+  const exac=num(m.exac)||0;
+  const child=isChild(m.age);
+  const t1=!child&&m.track==='t1';
+  let cur=+m.step;
+  if(t1&&cur<2)cur=2;              // Track 1 Steps 1–2 share one regimen
+  const issues=[];
+  const ck=m.checks||{};
+  if(ck.tech===false)issues.push('吸入技巧不正確');
+  if(ck.adh===false)issues.push('未規則使用維持藥');
+  if(ck.exp===false)issues.push('持續暴露於過敏原、菸、空汙或誘發藥物（β 阻斷劑、NSAID）');
+  if(ck.comorb===false)issues.push('共病尚未處理');
+  if(ck.dx===false)issues.push('診斷尚未確認');
+  const out={ctl,exac,issues,from:cur,to:cur,action:'stay',why:[],cautions:[]};
+  const minStep=t1?2:1;
+  if(ctl.level==='well'&&exac===0){
+    const stable=num(m.stable)||0;
+    if(stable>=3&&cur>minStep){
+      out.action='down';
+      out.to=(t1&&cur===3)?2:cur-1;
+      out.why.push('症狀控制良好已 '+stable+' 個月，過去一年無急性發作');
+    }else if(stable>=3){
+      out.action='stay';
+      out.why.push('已在最低階梯，維持最低有效治療');
+      out.cautions.push('不要完全停用 ICS：只用 SABA 會增加急性發作風險');
+    }else{
+      out.action='stay';
+      out.why.push('症狀控制良好，但尚未穩定滿 3 個月');
     }
-
-    function loadPreset(c) {
-        if (c === 'case1') {
-            document.querySelector('input[name="daytimeSym"][value="less_2_month"]').checked = true;
-            document.querySelector('input[name="nightWaking"][value="none"]').checked = true;
-            document.getElementById('exacerbations').value = '0';
-            document.getElementById('fev1').value = 'normal';
-            document.getElementById('bm_eos').checked = false;
-            document.getElementById('bm_feno').checked = false;
-            document.getElementById('bm_ige').checked = false;
-        } else if (c === 'case2') {
-            document.querySelector('input[name="daytimeSym"][value="two_month_to_weekly"]').checked = true;
-            document.querySelector('input[name="nightWaking"][value="less_weekly"]').checked = true;
-            document.getElementById('exacerbations').value = '0';
-            document.getElementById('fev1').value = 'normal';
-            document.getElementById('bm_eos').checked = false;
-            document.getElementById('bm_feno').checked = false;
-            document.getElementById('bm_ige').checked = false;
-        } else if (c === 'case3') {
-            document.querySelector('input[name="daytimeSym"][value="most_days"]').checked = true;
-            document.querySelector('input[name="nightWaking"][value="weekly_plus"]').checked = true;
-            document.getElementById('exacerbations').value = '1';
-            document.getElementById('fev1').value = 'mild_low';
-            document.getElementById('bm_eos').checked = false;
-            document.getElementById('bm_feno').checked = false;
-            document.getElementById('bm_ige').checked = false;
-        } else if (c === 'case4') {
-            document.querySelector('input[name="daytimeSym"][value="severe_daily"]').checked = true;
-            document.querySelector('input[name="nightWaking"][value="weekly_plus"]').checked = true;
-            document.getElementById('exacerbations').value = '2+';
-            document.getElementById('fev1').value = 'severe_low';
-            document.getElementById('bm_eos').checked = true;
-            document.getElementById('bm_feno').checked = true;
-            document.getElementById('bm_ige').checked = true;
-        }
-        calculateTherapy();
+    if(out.action==='down'&&(lowLF(m.fev1)||m.icu))out.cautions.push('有急性發作風險因子（低肺功能或曾插管／入加護病房），降階需密切追蹤');
+  }else{
+    if(ctl.level!=='well')out.why.push('過去 4 週'+ctl.label+'（'+ctl.n+'/4 項）');
+    if(exac>0)out.why.push('過去 12 個月急性發作 '+exac+' 次');
+    let next;
+    if(child&&cur===1){
+      next=m.c1==='icsform'?3:2;
+    }else next=Math.min(cur+1,5);
+    if(issues.length){
+      out.action='fix';out.to=cur;out.next=next;
+      out.why.push('升階前先處理：'+issues.join('、'));
+    }else if(cur>=5){
+      out.action='severe';out.to=5;
+      out.why.push('Step 5 治療下仍控制不良，進入重度氣喘評估');
+    }else{
+      out.action=(ctl.level==='partly'&&exac===0)?'consider':'up';
+      out.to=next;
+      if(child&&cur===1)out.why.push('兒童 Step 1 升階依原用藥決定（GINA 共識建議）');
+      if(exac>0&&!t1&&!child)out.cautions.push('可改用 Track 1（ICS-formoterol 緩解）同一階梯，比 SABA 緩解更能減少急性發作');
     }
+    if(exac>0)out.cautions.push('任何一次需急診或 OCS 的發作都是警訊，應檢視治療並給書面行動計畫');
+  }
+  return out;
+}
 
-    window.onload = function() { calculateTherapy(); };
+/* Regimens for each step */
+const T1={
+  2:{lab:'Steps 1–2 · AIR-only',rel:'按需要低劑量 ICS-formoterol',mt:'無每日維持藥',ex:'Budesonide-formoterol 160/4.5 mcg（如 Symbicort）或 BDP-formoterol 100/6 mcg（如 Foster）：有症狀時 1 吸，需要時數分鐘後可再加 1 吸；運動或接觸過敏原前也可使用。',note:'24 小時內總吸數 >12 吸應就醫。'},
+  3:{lab:'Step 3 · 低劑量 MART',rel:'同一支 ICS-formoterol，需要時 1 吸',mt:'低劑量 ICS-formoterol 每日維持',ex:'Budesonide-formoterol 160/4.5 mcg：早晚各 1 吸（或每日 1 吸）＋需要時 1 吸。',note:'24 小時內總吸數 >12 吸應就醫。'},
+  4:{lab:'Step 4 · 中劑量 MART',rel:'同一支 ICS-formoterol，需要時 1 吸',mt:'中劑量 ICS-formoterol 每日維持',ex:'Budesonide-formoterol 160/4.5 mcg：早晚各 2 吸＋需要時 1 吸。',note:'Step 4 不建議使用高劑量 ICS-formoterol。'},
+  5:{lab:'Step 5 · MART＋附加治療',rel:'ICS-formoterol（另加 LAMA 單方時仍可用它緩解）',mt:'中劑量 MART＋附加 LAMA；轉介做表型評估；可考慮試用高劑量 ICS-formoterol 維持；符合者加生物製劑',ex:'Budesonide-formoterol 160/4.5 mcg 早晚各 2 吸＋需要時 1 吸，加 tiotropium Respimat 2.5 mcg 每日 2 噴。生物製劑見第 4 頁。',note:'Budesonide-formoterol-glycopyrronium（Breztri）GINA 2026 列為選項，但健保僅給付 COPD。'}
+};
+const T2={
+  1:{lab:'Step 1 · AIR（ICS-SABA）',rel:'按需要低劑量 ICS-SABA 複方；若無，每次用 SABA 後立即吸低劑量 ICS',mt:'無每日維持藥',ex:'Budesonide-albuterol 80/90 mcg 需要時 2 吸（一天最多 6 次）；或 salbutamol 100 mcg 1–2 噴後，接著吸低劑量 ICS 1 劑。',note:'ICS-SABA 複方在台灣的可近性請查院內處方集。症狀這麼少的病人通常不會規則使用每日 ICS。'},
+  2:{lab:'Step 2 · 每日低劑量 ICS',rel:'按需要 ICS-SABA，或 SABA',mt:'每日低劑量 ICS',ex:'Fluticasone propionate 100–250 mcg/日（如 Flixotide 50 mcg 早晚各 2 噴）或 budesonide 200–400 mcg/日；加上按需要 SABA。',note:'選擇 SABA 緩解前，先評估病人能否規則使用每日 ICS。'},
+  3:{lab:'Step 3 · 低劑量 ICS-LABA',rel:'按需要 ICS-SABA，或 SABA',mt:'每日低劑量 ICS-LABA（替代：中劑量 ICS）',ex:'Fluticasone propionate-salmeterol 100/50 mcg（如 Seretide Accuhaler）早晚各 1 吸，或 fluticasone furoate-vilanterol 92/22 mcg（如 Relvar）每日 1 吸；加上按需要 SABA。',note:'不建議在低劑量 ICS-LABA 上加 LAMA；應先改 MART 或增至中劑量。'},
+  4:{lab:'Step 4 · 中劑量 ICS-LABA',rel:'按需要 ICS-SABA，或 SABA',mt:'每日中劑量 ICS-LABA',ex:'Fluticasone propionate-salmeterol 250/50 mcg 早晚各 1 吸（FP 500 mcg/日），或 BDP-formoterol 100/6 mcg 早晚各 2 吸（超細微粒 BDP 400 mcg/日）；加上按需要 SABA。',note:'偶爾需要高劑量 ICS-LABA，盡量限於 3–6 個月。'},
+  5:{lab:'Step 5 · ICS-LABA＋附加治療',rel:'按需要 ICS-SABA 或 SABA（若三合一含 formoterol，也可用 ICS-formoterol）',mt:'附加 LAMA 或改三合一吸入器；轉介做表型評估；可考慮試用高劑量 ICS-LABA；符合者加生物製劑',ex:'Trelegy Ellipta 92/55/22 或 184/55/22 mcg 每日 1 吸；或 Trimbow 100/6/12.5 mcg 早晚各 2 吸；或 Enerzair Breezhaler 每日 1 顆；或原 ICS-LABA 加 tiotropium Respimat 2.5 mcg 每日 2 噴。',note:'三合一的健保條件見第 5 頁。維持性 OCS 只作為最後手段。'}
+};
+const KID={
+  1:{pref:['按需要低劑量 ICS-formoterol：budesonide-formoterol 80/4.5 mcg（計量 100/6）或 BDP-formoterol 100/6 mcg，有症狀時 1 吸','或 按需要低劑量 ICS＋SABA：ICS-SABA 複方，或每次用 SABA 後立即吸 ICS'],other:[],note:'24 小時內總吸數 >8 吸應就醫。GINA 不建議只用 SABA。'},
+  2:{pref:['每日低劑量 ICS（如 fluticasone propionate 50–100 mcg/日、budesonide 100–200 mcg/日）＋按需要 SABA 或 ICS-SABA'],other:['按需要低劑量 ICS-formoterol（Step 2 與每日 ICS 尚無直接比較）','每次用 SABA 時同時吸 ICS','每日 LTRA（效果比 ICS 差，需告知精神神經副作用）'],note:''},
+  3:{pref:['中劑量 ICS（如 fluticasone propionate >100–200 mcg/日）＋按需要 SABA 或 ICS-SABA','低劑量 ICS-LABA＋按需要 SABA 或 ICS-SABA','低劑量 ICS-formoterol MART：budesonide-formoterol 80/4.5 mcg 每日 1 吸＋需要時 1 吸'],other:['低劑量 ICS＋LTRA'],note:'個別反應不同，可先試其他 Step 3 選項，再考慮 Step 4。'},
+  4:{pref:['中劑量 ICS-LABA＋按需要 SABA 或 ICS-SABA','低劑量 ICS-formoterol MART：budesonide-formoterol 80/4.5 mcg 早晚各 1 吸＋需要時 1 吸','轉介專科'],other:['在 Step 3 首選控制藥上加 tiotropium 或 LTRA'],note:''},
+  5:{pref:['轉介做表型評估','可考慮較高劑量 ICS-LABA','或附加治療：LAMA、anti-IgE（omalizumab）、anti-IL4Rα（dupilumab）、anti-IL5（mepolizumab）'],other:[],note:'兒童 Step 5 不建議使用 ICS-formoterol MART。'}
+};
+function regimen(age,step,c1){
+  if(isChild(age)){
+    const r=KID[step];
+    let pref=r.pref;
+    if(step===2&&c1==='combo')pref=['每日低劑量 ICS＋按需要低劑量 ICS-SABA（原用 ICS-SABA 複方者的建議下一步）'].concat(pref);
+    if(step===2&&c1==='sep')pref=['每日低劑量 ICS＋按需要 SABA，每次用 SABA 時另加吸 ICS（原用分開吸入器者的建議下一步）'].concat(pref);
+    return {child:true,pref,other:r.other,note:r.note};
+  }
+  return {child:false,t1:T1[Math.max(2,step)],t2:T2[step]};
+}
+
+/* Step-down options, paraphrased from GINA Box 4-13 */
+function stepDown(age,track,from){
+  if(isChild(age))return ['控制良好且肺功能穩定 3 個月後，降一階，找出最低有效治療','每次調整後 1–3 個月回診，並給足夠藥物以便恢復原劑量'];
+  const t1=track==='t1';
+  const m={
+    t1:{5:['先停其他附加藥，尤其 OCS，再考慮降 ICS 劑量','生物製劑反應良好者需更長的穩定期'],4:['維持劑量降為低劑量（早晚各 1 吸），續用 ICS-formoterol 緩解'],3:['維持劑量改為每日 1 次，續用 ICS-formoterol 緩解','或改為只在需要時使用（AIR-only）']},
+    t2:{5:['先停其他附加藥，尤其 OCS，再考慮降 ICS 劑量','生物製劑反應良好者需更長的穩定期'],4:['續用 ICS-LABA，ICS 劑量減半（停用 LABA 可能惡化）','或改 ICS-formoterol MART，維持劑量較低'],3:['ICS-LABA 改為每日 1 次（停用 LABA 可能惡化）','若用中／高劑量 ICS 單方：劑量減半'],2:['改為每日 1 次劑型（budesonide、ciclesonide、mometasone、fluticasone furoate）','或改為按需要低劑量 ICS-formoterol','或改為每次用 SABA 時同時吸 ICS','不要完全停用 ICS']}
+  };
+  return (m[t1?'t1':'t2'][from]||[]).concat(['每 3 個月降低 ICS 劑量 25–50%，選在沒有呼吸道感染、不旅行、未懷孕的時機','給書面行動計畫與足夠藥物，以便必要時恢復原劑量']);
+}
+
+/* Risk factor alerts (GINA Box 2-2B) */
+const RISK=[['icu','曾因氣喘插管或入加護病房'],['saba','SABA 過度使用（每年 ≥3 支 200 噴）'],['smoke','吸菸或電子菸'],['obese','肥胖'],['crs','慢性鼻竇炎'],['gerd','胃食道逆流'],['preg','懷孕'],['food','確診食物過敏'],['psy','重大心理或社經問題'],['t2','血中嗜酸性白血球或 FeNO 偏高'],['allergen','致敏過敏原暴露'],['pollute','空氣汙染']];
+function riskAlerts(set,fev1,exac){
+  const a=[];
+  if(set.has('icu'))a.push(['stop','曾插管或入加護病房','致死性氣喘的高風險，需密切追蹤並給書面行動計畫。']);
+  if(set.has('saba'))a.push(['stop','SABA 過度使用','每年 ≥3 支與急性發作風險增加有關，每月 ≥1 支與死亡率增加有關。改用含 ICS 的緩解藥。']);
+  if(lowLF(fev1))a.push(['warn','FEV1 <60% 預測值','即使症狀少，急性發作風險仍高。']);
+  if(set.has('smoke'))a.push(['warn','吸菸','提供戒菸協助；吸菸也會降低 ICS 反應。']);
+  if(set.has('preg'))a.push(['info','懷孕','不要在懷孕期間降階；氣喘控制不良對胎兒的風險高於藥物。']);
+  const others=[...set].filter(k=>!['icu','saba','smoke','preg'].includes(k)).length;
+  if(others)a.push(['info','其他風險因子 '+others+' 項','依 GINA Box 3-5 處理可調整的因子（減重、治療鼻竇炎、減少暴露等）。']);
+  return a;
+}
+
+/* Severe asthma: GINA Box 8-3/8-4 */
+function bioGina(b){
+  const age=num(b.age),exac=num(b.exac),eos=num(b.eos),feno=num(b.feno),ige=num(b.ige),ocs=num(b.ocs)||0;
+  const f=b.feat||new Set();
+  const ex1=exac==null?null:exac>=1;
+  const ageOK=min=>age==null?null:age>=min;
+  const all=a=>a.some(x=>x===false)?false:a.every(x=>x===true)?true:null;
+  const ocsM=ocs>0;
+  const t2=[];
+  if(eos!=null&&eos>=150)t2.push('Eos '+eos+'/μL ≥150');
+  if(feno!=null&&feno>=20)t2.push('FeNO '+feno+' ppb ≥20');
+  if(f.has('allergen'))t2.push('過敏原誘發的症狀');
+  if(ocsM)t2.push('需維持性 OCS（可能壓抑生物標記）');
+  const classes=[
+    {k:'ige',name:'Anti-IgE',drugs:'omalizumab（含生物相似藥）',age:'≥6 歲',ok:all([ageOK(6),ex1,f.has('sens')?true:(b.sensKnown?false:null)]),
+      crit:['皮膚或特異性 IgE 檢測過敏原陽性','總 IgE 與體重在仿單劑量範圍內'+(ige!=null?'（IgE '+ige+'）':''),'過去一年有急性發作'],
+      pred:[f.has('child')&&'兒童期發病',f.has('allergen')&&'過敏原誘發的症狀'].filter(Boolean)},
+    {k:'il5',name:'Anti-IL5／IL5R',drugs:'mepolizumab（≥6 歲）、benralizumab 與 depemokimab（≥12 歲）、reslizumab IV（≥18 歲）',age:'≥6 歲',ok:all([ageOK(6),ex1,eos==null?null:eos>=150]),
+      crit:['過去一年有急性發作','Eos ≥150 或 ≥300/μL（依給付單位）'],
+      pred:[eos!=null&&eos>=300&&'Eos 較高（強預測）',exac!=null&&exac>=3&&'前一年發作次數多（強預測）',f.has('adult')&&'成人發病',f.has('crswnp')&&'鼻息肉',ocsM&&'基礎即用維持性 OCS'].filter(Boolean)},
+    {k:'il4',name:'Anti-IL4Rα',drugs:'dupilumab',age:'≥6 歲',ok:all([ageOK(6),ex1,((eos!=null&&eos>=150&&eos<=1500)||(feno!=null&&feno>=25)||ocsM)?true:((eos==null&&feno==null)?null:false)]),
+      crit:['過去一年有急性發作','Eos 150–1500/μL，或 FeNO ≥25 ppb，或需維持性 OCS'],
+      pred:[eos!=null&&eos>=300&&'Eos 較高（強預測）',feno!=null&&feno>=25&&'FeNO 較高（強預測）',f.has('crswnp')&&'鼻息肉',f.has('ad')&&'合併中重度異位性皮膚炎（共同適應症）'].filter(Boolean)},
+    {k:'tslp',name:'Anti-TSLP',drugs:'tezepelumab',age:'≥12 歲',ok:all([ageOK(12),ex1]),
+      crit:['過去一年有急性發作（不需要 Type 2 生物標記）'],
+      pred:[eos!=null&&eos>=300&&'Eos 較高',feno!=null&&feno>=25&&'FeNO 較高',f.has('crswnp')&&'鼻息肉'].filter(Boolean)}
+  ];
+  const warn=[];
+  if(eos!=null&&eos>=300)warn.push(['warn','Eos ≥300/μL','先排除寄生蟲（如糞小桿線蟲血清或糞便檢查），未治療的感染在使用 OCS 或生物製劑後可能散播。']);
+  if(eos!=null&&eos>=1500)warn.push(['stop','Eos ≥1500/μL','考慮 EGPA 等高嗜酸性白血球疾病；dupilumab 的典型條件上限為 1500/μL。']);
+  if(f.has('egpa'))warn.push(['info','疑似或已知 EGPA','mepolizumab 與 benralizumab 另有 EGPA 適應症。']);
+  return {t2,classes,warn};
+}
+
+/* Taiwan NHI chapter 6 (115.3.23): 6.2.6, 6.2.8, 6.2.9, 6.2.10 */
+function bioNhi(b){
+  const age=num(b.age),exac=num(b.exac),eos=num(b.eos),ige=num(b.ige),ocs=num(b.ocs),ocsm=num(b.ocsm);
+  const f=b.feat||new Set();
+  const c=(ok,label)=>({ok,label});
+  const ex=exac==null?null:(exac>=2&&!!b.er);
+  const exL='過去 12 個月 ≥2 次需全身性類固醇的發作，≥1 次急診或住院';
+  const e300=eos==null?null:eos>=300;
+  const ocsOK=need=>(ocs==null||ocsm==null)?null:(ocs>=5&&ocsm>=need);
+  const spec=c(!!b.spec,'專科醫師診斷');
+  const opt=c(!!b.optimal,'已用 GINA Step 5 最適切療法');
+  const adultOCS=age!=null&&age>=18;
+  const rows=[];
+  // Omalizumab
+  const omaKid=age!=null&&age<12;
+  rows.push({k:'oma',name:'Omalizumab',ref:'6.2.6',checks:[
+    c(age==null?null:age>=6,'年齡 ≥6 歲'),spec,
+    ...(omaKid?[]:[c(b.smoke==='cur'?false:true,'不吸菸或正積極戒菸')]),
+    c(f.has('sens')?true:(b.sensKnown?false:null),'過敏原檢測陽性'),
+    c(ige==null?null:(ige>=30&&ige<=1300),'總 IgE 30–1300 IU/mL'+(ige!=null?'（'+ige+'）':'')),
+    c(!!b.hics,'高劑量 ICS 併用其他控制藥仍控制不良'),
+    c((b.ctlN||0)>=2,'過去 4 週控制不佳 ≥2 項（目前 '+(b.ctlN||0)+' 項）'),
+    c(!!b.rev,'病歷證實 FEV1 可逆性')],
+    rule:'每月不得超過 2 次；16 週評估。'});
+  rows.push({k:'mepo',name:'Mepolizumab',ref:'6.2.8',checks:[
+    c(age==null?null:age>=6,'年齡 ≥6 歲'),spec,
+    c(e300,'12 個月內 Eos ≥300/μL'+(eos!=null?'（'+eos+'）':'')),opt,
+    c(ocsOK(adultOCS?3:1),'prednisolone ≥5 mg/日持續 ≥'+(adultOCS?3:1)+' 個月'),
+    c(ex,exL)],rule:'每 4 週 1 次；32 週評估。'});
+  rows.push({k:'benra',name:'Benralizumab',ref:'6.2.8',checks:[
+    c(age==null?null:age>=18,'年齡 ≥18 歲'),spec,
+    c(e300,'12 個月內 Eos ≥300/μL'+(eos!=null?'（'+eos+'）':'')),opt,
+    c(ocsOK(3),'prednisolone ≥5 mg/日持續 ≥3 個月'),
+    c(ex,exL)],rule:'第 0、4、8 週，之後每 8 週；32 週評估。'});
+  const dupiDose=(ocs&&ocs>0)||f.has('ad')||f.has('crswnp')?'600 mg 起始，之後 300 mg 每 2 週':'400 mg 起始，之後 200 mg 每 2 週';
+  rows.push({k:'dupi',name:'Dupilumab',ref:'6.2.9',checks:[
+    c(age==null?null:age>=12,'年齡 ≥12 歲'),spec,
+    c(e300,'12 個月內 Eos ≥300/μL'+(eos!=null?'（'+eos+'）':'')),opt,
+    c(ocsOK(adultOCS?6:1),'prednisolone ≥5 mg/日持續 ≥'+(adultOCS?'6':'1–3')+' 個月'),
+    c(ex,exL)],rule:dupiDose+'；32 週評估；不得併用其他氣喘生物製劑。'});
+  rows.push({k:'teze',name:'Tezepelumab',ref:'6.2.10',checks:[
+    c(age==null?null:age>=18,'年齡 ≥18 歲'),spec,opt,c(ex,exL)],rule:'每 4 週 1 次；32 週評估。'});
+  rows.forEach(r=>{r.verdict=r.checks.some(x=>x.ok===false)?'n':r.checks.every(x=>x.ok===true)?'y':'q';});
+  return rows;
+}
+
+/* Difficult-to-treat checklist (GINA Box 8-2) */
+const DTT=[['dx','已確認氣喘診斷（排除其他原因）'],['tech','吸入技巧已確認正確'],['adh','用藥順從性良好'],['comorb','共病已處理（鼻竇炎、GERD、肥胖、OSA、焦慮憂鬱）'],['exp','可調整的暴露已處理（菸、過敏原、職業、藥物）'],['opt','已用高劑量 ICS-LABA 或 GINA Step 5 最適切療法 3–6 個月']];
+function severeStatus(d){
+  const miss=DTT.filter(([k])=>!d[k]).map(x=>x[1]);
+  return {confirmed:miss.length===0,miss};
+}
+
+/* Acute exacerbation: GINA 2026 Box 9-4 (primary care) and Box 9-6 (acute care), ages ≥6 */
+const LIFE=[['drowsy','嗜睡'],['confused','意識混亂'],['cyan','發紺'],['silent','呼吸音微弱或安靜胸']];
+const MODF=[['rrup','呼吸速率上升'],['access','使用呼吸輔助肌'],['wheeze','呼氣喘鳴'],['air','呼吸音減弱']];
+const REDF=[['intub','曾因瀕死性氣喘插管'],['hosp','過去一年住院或多次急診'],['ocs','正在使用或剛停用 OCS'],['noics','未使用 ICS'],['adh','ICS 順從性差或沒有書面行動計畫'],['saba','SABA 過度使用（平均每月 >1 支或使用霧化 SABA）'],['psy','精神疾病或心理社會問題'],['food','食物過敏或過敏性休克病史'],['percep','對氣流受限感知不良'],['comorb','肺炎、糖尿病或心律不整']];
+function acuteSeverity(a){
+  const spo2=num(a.spo2),rr=num(a.rr),pef=num(a.pef),pram=a.age==='adult'?null:num(a.pram);
+  const life=a.life||new Set(),mod=a.mod||new Set();
+  const lw=LIFE.filter(([k])=>life.has(k)).map(x=>x[1]);
+  if(pram!=null&&pram>=11)lw.push('PRAM '+pram+'（11–12）');
+  if(lw.length)return {sev:'life',why:lw,missing:[]};
+  const sw=[];
+  if(a.speech==='unable')sw.push('無法說話、喝水或平躺');
+  if(spo2!=null&&spo2<92)sw.push('SpO2 '+spo2+'%（<92%）');
+  if(rr!=null&&rr>30)sw.push('呼吸速率 '+rr+'/min（>30）');
+  if(pef!=null&&pef<50)sw.push('PEF/FEV1 '+pef+'%（<50%）');
+  if(pram!=null&&pram>=8)sw.push('PRAM '+pram+'（8–12）');
+  if(sw.length)return {sev:'severe',why:sw,missing:[]};
+  const mw=[];
+  if(a.speech==='phr')mw.push('只能說片語，偏好坐著');
+  if(spo2!=null&&spo2<94)mw.push('SpO2 '+spo2+'%（92–93%）');
+  if(pef!=null&&pef<=70)mw.push('PEF/FEV1 '+pef+'%（50–70%）');
+  if(pram!=null&&pram>=4)mw.push('PRAM '+pram+'（4–7）');
+  MODF.forEach(([k,t])=>{if(mod.has(k))mw.push(t);});
+  const missing=[];
+  if(spo2==null)missing.push('SpO2');
+  if(pef==null&&!(a.age!=='adult'&&pram!=null))missing.push(a.age==='adult'?'PEF 或 FEV1':'PEF 或 PRAM');
+  if(mw.length)return {sev:'moderate',why:mw,missing};
+  return {sev:'mild',why:['說完整句子、可平躺、無明顯呼吸費力'],missing};
+}
+const r1=x=>Math.round(x*10)/10;
+function ocsDose(age,wt,setting){
+  const w=num(wt);
+  if(age==='child'){
+    if(w==null)return 'Prednisolone 1–2 mg/kg/日（最多 40 mg/日）× 3–5 天；或 dexamethasone 0.3–0.6 mg/kg（最多 12 mg）每日 1 次，共 1–2 天。';
+    const rg=(lo,hi,u)=>lo===hi?`${lo} ${u}（已達上限）`:`${lo}–${hi} ${u}`;
+    return `Prednisolone ${rg(r1(Math.min(w,40)),r1(Math.min(2*w,40)),'mg/日')}（1–2 mg/kg，最多 40 mg）× 3–5 天；或 dexamethasone ${rg(r1(Math.min(.3*w,12)),r1(Math.min(.6*w,12)),'mg')}（0.3–0.6 mg/kg，最多 12 mg）每日 1 次，共 1–2 天，復發時改 prednisolone。`;
+  }
+  const d=w==null?'1 mg/kg/日，最多 50 mg':`${r1(Math.min(w,50))} mg/日（1 mg/kg，最多 50 mg）`;
+  return `Prednisolone ${d}，早上單次口服，共 5–7 天，不需漸減。`+(setting==='ed'?'無法吞嚥、嘔吐或需呼吸器時改 hydrocortisone 200 mg/日分次靜脈注射。':'');
+}
+function acutePlan(a){
+  const s=acuteSeverity(a),ed=a.setting==='ed',kid=a.age==='child';
+  const tx=[];
+  if(a.ana)tx.push(['stop','先給 epinephrine','合併全身性過敏反應：先肌肉注射（或鼻噴）epinephrine，再立即給支氣管擴張劑。']);
+  const bf=kid?'':'，或 budesonide-formoterol 160/4.5 mcg 2 吸';
+  if(s.sev==='mild'){
+    tx.push(['go','支氣管擴張劑',`Salbutamol 4 噴（pMDI＋spacer）${bf}。評估反應，需要時 30–60 分鐘後再給 1 次。`]);
+  }else if(s.sev==='moderate'){
+    tx.push(['warn','支氣管擴張劑',ed?'Salbutamol 4–6 噴＋ipratropium 4 噴（pMDI＋spacer），或 salbutamol 2.5 mg＋ipratropium 0.25 mg 霧化；需要時每 20–30 分鐘 1 次，最多 3 次。':'Salbutamol 4–6 噴（pMDI＋spacer）或 2.5 mg 霧化，需要時每 20–30 分鐘 1 次，最多 3 次；需要且可取得時，每次加 ipratropium 4 噴，最多 3 次。']);
+    tx.push(['warn','全身性類固醇','開始口服類固醇（劑量見下）。']);
+  }else if(s.sev==='severe'||(s.sev==='life'&&!ed)){
+    if(!ed)tx.push(['stop','安排轉送急性照護機構','同時立即開始治療，持續監測。']);
+    tx.push(['stop','支氣管擴張劑','Salbutamol 6–10 噴＋ipratropium 4 噴（pMDI＋spacer），或 salbutamol 5 mg＋ipratropium 0.25 mg 霧化；需要時每 20–30 分鐘 1 次，最多 3 次。']);
+    tx.push(['stop','氧氣','目標 SpO2 92–95%（成人給氧時不超過 96%）。沒有血氧機時不要因此不給氧。']);
+    tx.push(['stop','全身性類固醇','1 小時內給；口服與靜脈效果相同，以口服為優先。']);
+    if(ed)tx.push(['stop','考慮靜脈鎂','對初始治療無反應且持續低血氧，或兒童 1 小時後 FEV1 仍 <60%：magnesium sulfate 單次 2 g 靜脈輸注 20 分鐘（兒童依院內規範調整）。']);
+  }
+  if(s.sev==='life'&&ed){
+    tx.push(['stop','呼叫支援','聯絡兒童加護或麻醉科團隊；建立靜脈管路。']);
+    tx.push(['stop','立即治療','霧化 salbutamol＋ipratropium；100% 氧氣（非再吸入面罩）；全身性類固醇；靜脈鎂。']);
+    tx.push(['stop','監測','持續監測、照胸部 X 光、考慮血氧分析，注意 SABA 毒性。']);
+  }
+  const alerts=[];
+  const red=a.red||new Set();
+  if(red.size)alerts.push(['stop','致死性氣喘高風險因子 '+red.size+' 項','降低住院門檻，及早給全身性類固醇並密切觀察。']);
+  if(s.sev==='severe'||s.sev==='life')alerts.push(['warn','注意 SABA 毒性','心搏過速、心悸、焦慮、低血鉀、心律不整、乳酸中毒、過度換氣，可能被誤認為氣喘惡化而再加大劑量。']);
+  if(s.missing&&s.missing.length&&s.sev!=='life'&&s.sev!=='severe')alerts.push(['info','尚未測量：'+s.missing.join('、'),'嚴重度判定以現有資料為準；輕度須 SpO2 ≥94% 且 PEF >70%。']);
+  if(num(a.spo2)!=null&&num(a.spo2)<90)alerts.unshift(['stop','SpO2 <90%','需積極治療。']);
+  return {...s,tx,ocs:(s.sev==='mild'?'若反應不佳或發作前已增加緩解藥與 ICS 仍無效，考慮口服類固醇：':'')+ocsDose(a.age,a.wt,a.setting),alerts};
+}
+function acuteDispo(a){
+  const ed=a.setting==='ed',out=[];
+  if(a.resp==='na'||!a.resp){out.push(['info','治療後 1 小時（或更早）再評估','SpO2、呼吸速率、呼吸輔助肌、呼吸音、PEF'+(a.age==='adult'?'':'，<18 歲重算 PRAM')+'。']);return {decision:'pending',items:out};}
+  if(a.resp==='worse'){
+    if(!ed){out.push(['stop','立即轉送急性照護機構','惡化或沒有改善：依重度流程持續治療並轉送。']);return {decision:'transfer',items:out};}
+    out.push(['stop','惡化','考慮其他或合併原因；需要時加給 salbutamol 與 ipratropium（注意毒性）；尚未給則給全身性類固醇；給靜脈鎂；考慮轉加護病房。']);
+    return {decision:'icu',items:out};
+  }
+  const admit=[];
+  if(ed){
+    const sb=num(a.spo2b);
+    if(sb!=null&&sb<92)admit.push('室內空氣 SpO2 <92%');
+    if(a.q12)admit.push('仍需每 1–2 小時使用 SABA');
+    if(a.dysp)admit.push('全身性類固醇 4–6 小時後仍喘');
+    if(a.red&&a.red.size)admit.push('有致死性氣喘高風險因子或影響順從、追蹤的因素');
+  }
+  if(a.resp==='partial'){
+    out.push(['warn','部分改善',ed?'持續監測，需要時再給 salbutamol（注意毒性），考慮再加 ipratropium；尚未給則給全身性類固醇。至少每小時再評估。':'需要時再給支氣管擴張劑並再評估；若未持續改善，轉送急性照護機構。']);
+    if(admit.length)out.push(['stop','考慮住院',admit.join('、')]);
+    return {decision:admit.length?'admit':'observe',items:out};
+  }
+  const sb=num(a.spo2b),pb=num(a.pefb);
+  const crit=[[!!a.mildAfter,'症狀達輕度標準且距最後一次 salbutamol 1–2 小時'],[sb==null?null:sb>=92,'室內空氣 SpO2 ≥92%'],[pb==null?null:pb>70,'PEF 或 FEV1 >70% 個人最佳或預測值'],[!!a.home,'家中照顧資源足夠']];
+  const unmet=crit.filter(c=>c[0]!==true).map(c=>c[1]+(c[0]==null?'（未測）':''));
+  if(admit.length)out.push(['stop','考慮住院',admit.join('、')]);
+  if(!unmet.length&&!admit.length){out.push(['go','可以出院','符合出院條件，依下方出院安排。']);return {decision:'discharge',items:out,crit};}
+  out.push(['warn','暫不出院','尚未符合：'+unmet.join('、')+'。繼續觀察並再評估。']);
+  return {decision:admit.length?'admit':'observe',items:out,crit};
+}
+function discharge(a){
+  const kid=a.age==='child',L=[];
+  if(a.maint==='none')L.push(kid?'出院前開始含 ICS 的治療：Step 3 或 Step 4（如 budesonide-formoterol 80/4.5 mcg MART，或中劑量 ICS-LABA）。':'出院前開始含 ICS 的治療，首選從 Step 4 開始 ICS-formoterol MART（budesonide-formoterol 160/4.5 mcg 早晚各 2 吸＋需要時 1 吸）。');
+  else if(a.maint==='t1')L.push('繼續 ICS-formoterol 作為緩解藥（若院內改用 SABA，出院前改回）；'+(kid?'':'成人與青少年可從 Step 4 MART 開始，')+'恢復後 2–3 個月穩定再降階。');
+  else L.push('使用 ICS 或 ICS-LABA＋SABA 者：未來 2–4 週提高 ICS 劑量；'+(kid?'':'≥12 歲建議改用 ICS-formoterol MART（Step 4），')+'不要只用 SABA。');
+  L.push((a.sev==='mild'?'若已開始口服類固醇，續用：':'口服類固醇：')+ocsDose(a.age,a.wt,'pc')+' 停藥前先評估恢復情形。');
+  L.push('緩解藥改為需要時使用，不要規則使用；ipratropium 在治療 1–2 小時後沒有額外好處。');
+  L.push('出院前確認並矯正吸入技巧（pMDI 搭配 spacer），強調順從性，給或更新書面行動計畫，確保藥量足夠到回診。');
+  L.push('找出這次的誘因：過敏原或刺激物暴露、病毒感染、長期 ICS 不足、沒有行動計畫。');
+  L.push(kid?'2–5 天內回診。':'2–7 天內回診。'+'之後 2–3 個月內再追蹤控制度。');
+  if(a.prior||a.icu)L.push('轉介專科：'+[a.prior?'過去 12 個月已有需 OCS 或緊急就醫的發作':'',a.icu?'這次需要加護病房':''].filter(Boolean).join('、')+'。');
+  return L;
+}
+
+return {AGE,control,initial,ongoing,regimen,stepDown,RISK,riskAlerts,bioGina,bioNhi,DTT,severeStatus,lowLF,LIFE,MODF,REDF,acuteSeverity,acutePlan,acuteDispo,discharge,ocsDose};
+})();
+if(typeof module!=='undefined')module.exports=AE;
+/*ENGINE-END*/
+</script>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1800);}
+function copyText(txt){const ok=()=>toast('已複製到剪貼簿');const fb=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){toast('無法自動複製');}ta.remove();};if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(ok,fb);else fb();}
+function segBind(sel,cb){$$(sel+' button').forEach(b=>b.addEventListener('click',()=>{segSet(sel,b.dataset.v);cb(b.dataset.v);}));}
+function segSet(sel,v){$$(sel+' button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===String(v)?'true':'false'));}
+const val=id=>$(id).value;
+const TABS=['dx','tx','acute','bio','nhi','ref'];
+function showTab(id){TABS.forEach(t=>{$('#'+t).hidden=t!==id;$('#tab-'+t).setAttribute('aria-selected',t===id?'true':'false');});try{localStorage.setItem('asthma-tab',id);}catch(e){}}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.t)));
+const alertHtml=a=>`<div class="alert ${a[0]}"><strong>${esc(a[1])}</strong><span class="small">${esc(a[2])}</span></div>`;
+
+/* ================= 1. Diagnosis ================= */
+function renderDx(){
+  const pre=parseFloat(val('#d-pre')),post=parseFloat(val('#d-post'));
+  if(pre>0&&post>0){
+    const ml=Math.round((post-pre)*1000),pct=(post-pre)/pre*100,pos=pct>=12&&ml>=200;
+    $('#d-out').innerHTML=`<div class="m"><div class="k">增加量</div><div class="v">${ml} mL</div></div><div class="m"><div class="k">增加百分比</div><div class="v">${pct.toFixed(1)}%</div></div><div class="m${pos?' ok':''}"><div class="k">判讀</div><div class="v" style="font-size:16px;font-family:var(--f-body)">${pos?'BDR 陽性':'未達陽性標準'}</div></div>`;
+  }else $('#d-out').innerHTML='<p class="small muted">請輸入用藥前後 FEV1。</p>';
+  const mx=parseFloat(val('#d-pmax')),mn=parseFloat(val('#d-pmin')),ch=val('#d-age')==='child';
+  if(mx>0&&mn>0&&mx>=mn){
+    const v=(mx-mn)/((mx+mn)/2)*100,thr=ch?13:10;
+    $('#d-pef').innerHTML=`<div class="m${v>thr?' ok':''}"><div class="k">變異度（粗估）</div><div class="v">${v.toFixed(1)}%</div></div><div class="m"><div class="k">門檻</div><div class="v">&gt;${thr}%</div></div>`;
+  }else $('#d-pef').innerHTML='<p class="small muted">請輸入最高與最低 PEF（最高 ≥ 最低）。</p>';
+}
+['#d-pre','#d-post','#d-pmax','#d-pmin','#d-age'].forEach(id=>$(id).addEventListener('input',()=>{$('#d-sample').hidden=true;renderDx();}));
+
+/* ================= 2. Treatment ================= */
+const S={age:'adult',ctx:'maint',
+  init:{days:'most',night:true,fev1:'72',recentExac:false,acute:false},
+  m:{track:'t2',step:3,c1:'icsform',ctl:{day:true,night:true,rel:true,act:false},exac:'1',fev1:'68',stable:'0',checks:{tech:true,adh:true,exp:true,comorb:true,dx:true}},
+  risk:new Set(['allergen'])};
+const CHECKS=[['tech','吸入技巧已確認正確'],['adh','規則使用維持藥（順從性良好）'],['exp','無持續暴露（過敏原、菸、空汙、β 阻斷劑、NSAID）'],['comorb','共病已處理（鼻炎／鼻竇炎、GERD、肥胖、OSA、焦慮憂鬱）'],['dx','診斷已確認為氣喘']];
+$('#t-checks').innerHTML=CHECKS.map(([k,t])=>`<label class="check"><input type="checkbox" id="ck-${k}" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+$('#t-risk').innerHTML=AE.RISK.map(([k,t])=>`<label class="chip${['icu','saba'].includes(k)?' bad':''}"><input type="checkbox" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+function untouched(){ $('#t-sample').hidden=true; }
+
+function stepOptions(){
+  const child=S.age==='child',t1=!child&&S.m.track==='t1';
+  const opts=child?[[1,'Step 1'],[2,'Step 2'],[3,'Step 3'],[4,'Step 4'],[5,'Step 5']]
+    :t1?[[2,'Steps 1–2（AIR-only）'],[3,'Step 3（低劑量 MART）'],[4,'Step 4（中劑量 MART）'],[5,'Step 5']]
+    :[[1,'Step 1（按需 ICS-SABA）'],[2,'Step 2（低劑量 ICS）'],[3,'Step 3（低劑量 ICS-LABA）'],[4,'Step 4（中劑量 ICS-LABA）'],[5,'Step 5']];
+  if(t1&&S.m.step<2)S.m.step=2;
+  $('#t-step').innerHTML=opts.map(([v,t])=>`<option value="${v}"${v===S.m.step?' selected':''}>${t}</option>`).join('');
+  $('#t-trackwrap').hidden=child;
+  $('#t-c1wrap').hidden=!(child&&S.m.step===1);
+}
+function fillTx(){
+  segSet('#t-age',S.age);segSet('#t-ctx',S.ctx);segSet('#t-days',S.init.days);
+  $('#t-night').checked=S.init.night;$('#t-rexac').checked=S.init.recentExac;$('#t-acute').checked=S.init.acute;$('#t-fev1').value=S.init.fev1;
+  $('#t-track').value=S.m.track;$('#t-c1').value=S.m.c1;
+  ['day','night','rel','act'].forEach(k=>$('#c-'+k).checked=S.m.ctl[k]);
+  $('#t-exac').value=S.m.exac;$('#t-mfev1').value=S.m.fev1;$('#t-stable').value=S.m.stable;
+  CHECKS.forEach(([k])=>$('#ck-'+k).checked=S.m.checks[k]);
+  $$('#t-risk input').forEach(i=>i.checked=S.risk.has(i.dataset.k));
+  stepOptions();
+}
+segBind('#t-age',v=>{S.age=v;untouched();stepOptions();renderTx();});
+segBind('#t-ctx',v=>{S.ctx=v;untouched();renderTx();});
+segBind('#t-days',v=>{S.init.days=v;untouched();renderTx();});
+[['#t-night','night'],['#t-rexac','recentExac'],['#t-acute','acute']].forEach(([id,k])=>$(id).addEventListener('change',e=>{S.init[k]=e.target.checked;untouched();renderTx();}));
+$('#t-fev1').addEventListener('input',e=>{S.init.fev1=e.target.value;untouched();renderTx();});
+$('#t-track').addEventListener('change',e=>{S.m.track=e.target.value;untouched();stepOptions();renderTx();});
+$('#t-step').addEventListener('change',e=>{S.m.step=+e.target.value;untouched();stepOptions();renderTx();});
+$('#t-c1').addEventListener('change',e=>{S.m.c1=e.target.value;untouched();renderTx();});
+['day','night','rel','act'].forEach(k=>$('#c-'+k).addEventListener('change',e=>{S.m.ctl[k]=e.target.checked;untouched();renderTx();}));
+[['#t-exac','exac'],['#t-mfev1','fev1'],['#t-stable','stable']].forEach(([id,k])=>$(id).addEventListener('input',e=>{S.m[k]=e.target.value;untouched();renderTx();}));
+CHECKS.forEach(([k])=>$('#ck-'+k).addEventListener('change',e=>{S.m.checks[k]=e.target.checked;untouched();renderTx();}));
+$$('#t-risk input').forEach(i=>i.addEventListener('change',()=>{i.checked?S.risk.add(i.dataset.k):S.risk.delete(i.dataset.k);untouched();renderTx();}));
+
+let lastSummary='';
+function trackCard(t,name,pref,tag){
+  return `<div class="trk${pref?' pref':''}"><h4><span>${name}</span><span class="pill ${pref?'go':'mute'}">${tag}</span></h4>
+    <p class="small muted" style="margin-top:2px">${esc(t.lab)}</p>
+    <dl class="kv"><dt>維持</dt><dd>${esc(t.mt)}</dd><dt>緩解</dt><dd>${esc(t.rel)}</dd></dl>
+    <div class="dose">${esc(t.ex)}</div>${t.note?`<p class="small muted" style="margin-top:6px">${esc(t.note)}</p>`:''}</div>`;
+}
+function renderTx(){
+  const child=S.age==='child';
+  $('#t-init').hidden=S.ctx!=='init';$('#t-maint').hidden=S.ctx!=='maint';
+  $('#t-days3').textContent=child?'3–4 天/週':'3 天/週';
+  $('#t-daysmost').textContent=child?'≥5 天/週（大多數日子）':'≥4 天/週（大多數日子）';
+  const c=AE.control(S.m.ctl);
+  $('#c-n').textContent=c.n;$('#c-lvl').textContent=c.label;$('#c-lvl').className='pill '+(c.level==='well'?'go':c.level==='partly'?'warn':'stop');
+
+  let step,from=null,title,sub,why,alerts=[],c1=S.m.c1,trackPref=null,downList=null;
+  const fev1=S.ctx==='init'?S.init.fev1:S.m.fev1;
+  if(S.ctx==='init'){
+    const r=AE.initial({...S.init,age:S.age});
+    step=r.step;why=r.why;
+    title=child?`起始治療：Step ${step}`:(step<=2?'起始治療：Track 1 Steps 1–2':`起始治療：Step ${step}`);
+    sub=['','症狀很少','症狀少於每週大多數日子','大多數日子有症狀、夜間醒來或肺功能低','每天症狀或夜醒，加上肺功能低或近期發作','初次表現即為急性發作'][r.row];
+    if(!child&&step<=2)sub+=`；Track 2 為 Step ${step}`;
+    if(r.row===5)alerts.push(['stop','先依急性發作流程處置','嚴重發作給短期 OCS；'+(child?'出院前開始 Step 3 或 Step 4 治療。':'開始中劑量 MART（Track 2：中劑量 ICS-LABA＋按需 SABA）。')]);
+    alerts.push(['info','2–3 個月後回診','評估反應；控制良好維持 3 個月後可降階。開始前請記錄診斷依據與肺功能。']);
+    c1=null;
+  }else{
+    const o=AE.ongoing({...S.m,age:S.age,icu:S.risk.has('icu')});
+    from=o.from;why=o.why.slice();
+    const lab={stay:'維持目前治療',down:'可以降階',up:'建議升階',consider:'考慮升階',fix:'先處理可調整因子',severe:'進入重度氣喘評估'}[o.action];
+    if(o.action==='fix'){step=o.from;title=lab;sub=`矯正後若仍控制不良，再升至 Step ${o.next}`;}
+    else if(o.action==='severe'){step=5;title=lab;sub='確認是否為重度氣喘，評估 Type 2 表型與生物製劑';}
+    else{step=o.to;title=lab+(o.action==='stay'?'':`：Step ${fmtStep(o.from)} → Step ${fmtStep(o.to)}`);sub=`控制度：${c.label}；過去 12 個月發作 ${o.exac} 次`;}
+    o.cautions.forEach(t=>alerts.push(['warn','注意',t]));
+    if(o.action==='fix')alerts.unshift(['warn','升階前先處理',o.issues.join('、')+'。處理後 2–3 個月再評估。']);
+    if(o.action==='severe')alerts.unshift(['stop','轉介重度氣喘評估','請到「重度氣喘與生物製劑」頁。']);
+    if(o.action==='down')downList=AE.stepDown(S.age,S.m.track,o.from);
+    if(!child)trackPref=S.m.track;
+  }
+  alerts=alerts.concat(AE.riskAlerts(S.risk,fev1,S.m.exac));
+
+  $('#r-step').textContent=fmtStep(step);
+  $('#r-title').textContent=title;$('#r-sub').textContent=sub;
+  const bar=$$('#r-bar i');bar.forEach((b,i)=>{const n=i+1;b.className='';if(isOn(n,step))b.classList.add('on');if(from!=null&&from!==step&&isOn(n,from)&&!isOn(n,step))b.classList.add('from');});
+  $('#r-why').innerHTML=why.map(w=>`<li>${esc(w)}</li>`).join('');
+  $('#r-alerts').innerHTML=(downList?`<div class="alert go"><strong>降階做法</strong><ul class="plain small" style="margin-top:2px">${downList.map(d=>`<li>${esc(d)}</li>`).join('')}</ul></div>`:'')+alerts.map(alertHtml).join('');
+
+  if(S.ctx==='init'&&S.init.acute){
+    $('#r-alerts').insertAdjacentHTML('afterbegin','<button class="btn primary noprint" id="r-goacute" style="justify-self:start">前往急性發作處置 →</button>');
+    $('#r-goacute').addEventListener('click',()=>{showTab('acute');window.scrollTo(0,0);});
+  }
+  const rg=AE.regimen(S.age,step,S.ctx==='maint'&&S.m.step===1?c1:null);
+  if(rg.child){
+    $('#r-tracks-h').textContent=`6–11 歲 Step ${step} 選項`;
+    $('#r-tracks').innerHTML=`<div>${rg.pref.map((p,i)=>`<div class="opt ${i===0?'first':'alt'}">${esc(p)}</div>`).join('')}</div>${rg.note?`<p class="small muted">${esc(rg.note)}</p>`:''}`;
+    $('#r-other').innerHTML=rg.other.length?`<div class="sub-h">其他控制藥選項（適應症有限或證據較少）</div>${rg.other.map(p=>`<div class="opt avoid">${esc(p)}</div>`).join('')}`:'';
+  }else{
+    $('#r-tracks-h').textContent='建議處方';
+    const tag2=trackPref==='t2'?'目前使用':'替代';
+    $('#r-tracks').innerHTML=trackCard(rg.t1,'Track 1：ICS-formoterol 緩解',true,trackPref==='t1'?'首選 · 目前使用':'首選')+trackCard(rg.t2,'Track 2：ICS-SABA 或 SABA 緩解',false,tag2);
+    $('#r-other').innerHTML=otherOptions(step);
+  }
+  lastSummary=summary(step,title,sub,why,rg);
+}
+function fmtStep(s){return (S.age!=='child'&&S.ctx==='init'&&s<=2)||(S.age!=='child'&&S.ctx==='maint'&&S.m.track==='t1'&&s===2)?'1–2':String(s);}
+function isOn(n,s){if(S.age!=='child'&&((S.ctx==='init'&&s<=2)||(S.ctx==='maint'&&S.m.track==='t1'&&s===2)))return n<=2;return n<=s;}
+function otherOptions(step){
+  const L={2:['每日 LTRA（效果比 ICS 差，需告知精神神經副作用）'],3:['中劑量 ICS（族群層級效果不如加 LABA）','低劑量 ICS＋LTRA','塵蟎致敏成人、FEV1 >70% 預測值：可加舌下減敏（HDM SLIT）'],4:['塵蟎致敏成人、FEV1 >70% 預測值：可加 HDM SLIT','在中／高劑量 ICS 上加 LTRA（效果不如 LABA）'],5:['成人持續症狀：專科評估後加 azithromycin 每週 3 次（先驗痰排除非結核分枝桿菌、檢查 QTc），至少 6 個月','維持性低劑量 OCS 只作為最後手段']};
+  const a=L[step]||[];
+  return a.length?`<div class="sub-h">其他控制藥選項（適應症有限或證據較少）</div>${a.map(p=>`<div class="opt avoid">${esc(p)}</div>`).join('')}`:'';
+}
+function summary(step,title,sub,why,rg){
+  const L=[];
+  L.push(`【氣喘治療評估｜GINA 2026】${AE.AGE[S.age]}，${S.ctx==='init'?'初診':'治療中'}`);
+  if(S.ctx==='maint'){const c=AE.control(S.m.ctl);L.push(`控制度：${c.label}（${c.n}/4）；過去12個月發作 ${S.m.exac||0} 次；FEV1 ${S.m.fev1||'未測'}%`);}
+  else L.push(`FEV1 ${S.init.fev1||'未測'}%`);
+  L.push(`結論：${title}${sub?'（'+sub+'）':''}`);
+  if(why.length)L.push('依據：'+why.join('；'));
+  if(rg.child)L.push('建議：'+rg.pref.join('／'));
+  else{L.push(`Track 1：${rg.t1.lab}｜${rg.t1.ex}`);L.push(`Track 2：${rg.t2.lab}｜${rg.t2.ex}`);}
+  if(S.risk.size)L.push('風險因子：'+AE.RISK.filter(([k])=>S.risk.has(k)).map(x=>x[1]).join('、'));
+  return L.join('\n');
+}
+$('#r-copy').addEventListener('click',()=>copyText(lastSummary));
+
+/* ================= 3. Biologics ================= */
+const B={age:'45',wt:'68',smoke:'no',exac:'3',er:true,ocs:'5',ocsm:'4',eos:'420',feno:'38',ige:'260',spec:true,hics:true,rev:true,
+  ctl:new Set(['day','rel','night']),feat:new Set(['sens','allergen','adult','crswnp']),dtt:{dx:true,tech:true,adh:true,comorb:true,exp:true,opt:true}};
+const BCTL=[['day','白天症狀 >2 次/週'],['night','夜間症狀或醒來'],['rel','緩解藥 >2 次/週'],['act','活動受限']];
+const FEAT=[['sens','過敏原檢測陽性'],['nosens','過敏原檢測陰性'],['allergen','症狀明顯由過敏原誘發'],['child','兒童期發病'],['adult','成人發病'],['crswnp','慢性鼻竇炎合併鼻息肉'],['ad','中重度異位性皮膚炎'],['egpa','疑似 EGPA']];
+$('#b-ctl').innerHTML=BCTL.map(([k,t])=>`<label class="chip"><input type="checkbox" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+$('#b-feat').innerHTML=FEAT.map(([k,t])=>`<label class="chip"><input type="checkbox" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+$('#b-dtt').innerHTML=AE.DTT.map(([k,t])=>`<label class="check"><input type="checkbox" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+const BNUM=['age','wt','exac','ocs','ocsm','eos','feno','ige'];
+function fillBio(){
+  BNUM.forEach(k=>$('#b-'+k).value=B[k]);$('#b-smoke').value=B.smoke;
+  ['er','spec','hics','rev'].forEach(k=>$('#b-'+k).checked=B[k]);
+  $$('#b-ctl input').forEach(i=>i.checked=B.ctl.has(i.dataset.k));
+  $$('#b-feat input').forEach(i=>i.checked=B.feat.has(i.dataset.k));
+  $$('#b-dtt input').forEach(i=>i.checked=!!B.dtt[i.dataset.k]);
+}
+const bTouch=()=>{$('#b-sample').hidden=true;renderBio();};
+BNUM.forEach(k=>$('#b-'+k).addEventListener('input',e=>{B[k]=e.target.value;bTouch();}));
+$('#b-smoke').addEventListener('change',e=>{B.smoke=e.target.value;bTouch();});
+['er','spec','hics','rev'].forEach(k=>$('#b-'+k).addEventListener('change',e=>{B[k]=e.target.checked;bTouch();}));
+$$('#b-ctl input').forEach(i=>i.addEventListener('change',()=>{i.checked?B.ctl.add(i.dataset.k):B.ctl.delete(i.dataset.k);bTouch();}));
+$$('#b-feat input').forEach(i=>i.addEventListener('change',()=>{
+  const k=i.dataset.k;
+  if(i.checked){B.feat.add(k);const opp={sens:'nosens',nosens:'sens',child:'adult',adult:'child'}[k];if(opp){B.feat.delete(opp);const o=$(`#b-feat input[data-k="${opp}"]`);if(o)o.checked=false;}}
+  else B.feat.delete(k);
+  bTouch();}));
+$$('#b-dtt input').forEach(i=>i.addEventListener('change',()=>{B.dtt[i.dataset.k]=i.checked;bTouch();}));
+const tick=ok=>ok===true?'<span class="tick y">✓</span>':ok===false?'<span class="tick n">✗</span>':'<span class="tick q">?</span>';
+function renderBio(){
+  const inp={...B,feat:B.feat,sensKnown:B.feat.has('sens')||B.feat.has('nosens'),optimal:!!B.dtt.opt,ctlN:B.ctl.size};
+  const sv=AE.severeStatus(B.dtt),g=AE.bioGina(inp),n=AE.bioNhi(inp);
+  let s='';
+  s+=sv.confirmed?alertHtml(['go','符合重度氣喘的前提','可調整因子已處理，且在高劑量 ICS-LABA 或 Step 5 療法下評估。'])
+    :alertHtml(['warn','目前較像難治型氣喘','先處理：'+sv.miss.join('、')+'。處理 3–6 個月後再評估是否為重度氣喘。']);
+  s+=g.t2.length?alertHtml(['info','有 Type 2 發炎證據',g.t2.join('；')])
+    :alertHtml(['warn','Type 2 證據不足','在認定非 Type 2 之前，重複檢測 Eos 與 FeNO 最多 3 次。非 Type 2 時可考慮 tezepelumab（≥12 歲）、成人 azithromycin、LAMA，或其他專科治療。']);
+  s+=g.warn.map(alertHtml).join('');
+  const ny=n.filter(r=>r.verdict==='y').map(r=>r.name);
+  s+=ny.length?alertHtml(['go','符合健保條文條件',ny.join('、')+'（仍需事前審查）']):alertHtml(['info','目前沒有符合健保條件的生物製劑','見下方逐項比對；GINA 臨床適應可能仍成立。']);
+  $('#b-sum').innerHTML=s;
+  $('#b-gina').innerHTML=g.classes.map(c=>`<tr class="biorow"><td>${tick(c.ok)} <b>${esc(c.name)}</b><div class="small muted">${esc(c.age)}</div></td><td class="small">${esc(c.crit.join('；'))}<div class="muted" style="margin-top:2px">${esc(c.drugs)}</div></td><td class="small">${c.pred.length?c.pred.map(esc).join('<br>'):'<span class="muted">—</span>'}</td></tr>`).join('');
+  $('#b-nhi').innerHTML=n.map(r=>`<tr><td><b>${esc(r.name)}</b><div class="small muted">${r.ref}</div><div class="verdict ${r.verdict}">${{y:'符合',n:'未符合',q:'資料不足'}[r.verdict]}</div></td><td><ul class="crit">${r.checks.map(x=>`<li>${tick(x.ok)}<span>${esc(x.label)}</span></li>`).join('')}</ul><p class="small muted" style="margin-top:4px">${esc(r.rule)}</p></td></tr>`).join('');
+}
+
+/* ================= 3. Acute ================= */
+const A={setting:'ed',age:'adult',wt:'60',ana:false,speech:'phr',spo2:'93',rr:'26',pef:'55',pram:'',
+  life:new Set(),mod:new Set(['access','wheeze']),red:new Set(['noics']),maint:'none',prior:true,icu:false,
+  resp:'na',mildAfter:false,home:true,spo2b:'',pefb:'',q12:false,dysp:false};
+const chipsHtml=(list,bad)=>list.map(([k,t])=>`<label class="chip${bad?' bad':''}"><input type="checkbox" data-k="${k}"><span>${esc(t)}</span></label>`).join('');
+$('#a-life').innerHTML=chipsHtml(AE.LIFE,true);$('#a-mod').innerHTML=chipsHtml(AE.MODF);$('#a-red').innerHTML=chipsHtml(AE.REDF,true);
+const ANUM=['wt','spo2','rr','pef','pram','spo2b','pefb'],ACHK=['ana','prior','icu','mildAfter','home','q12','dysp'];
+const aId=k=>'#a-'+({mildAfter:'mildafter'}[k]||k);
+function fillAcute(){
+  segSet('#a-set',A.setting);segSet('#a-age',A.age);segSet('#a-speech',A.speech);segSet('#a-resp',A.resp);
+  ANUM.forEach(k=>$(aId(k)).value=A[k]);ACHK.forEach(k=>$(aId(k)).checked=A[k]);$('#a-maint').value=A.maint;
+  [['#a-life','life'],['#a-mod','mod'],['#a-red','red']].forEach(([el,k])=>$$(el+' input').forEach(i=>i.checked=A[k].has(i.dataset.k)));
+}
+const aTouch=()=>{$('#a-sample').hidden=true;renderAcute();};
+segBind('#a-set',v=>{A.setting=v;aTouch();});segBind('#a-age',v=>{A.age=v;aTouch();});
+segBind('#a-speech',v=>{A.speech=v;aTouch();});segBind('#a-resp',v=>{A.resp=v;aTouch();});
+ANUM.forEach(k=>$(aId(k)).addEventListener('input',e=>{A[k]=e.target.value;aTouch();}));
+ACHK.forEach(k=>$(aId(k)).addEventListener('change',e=>{A[k]=e.target.checked;aTouch();}));
+$('#a-maint').addEventListener('change',e=>{A.maint=e.target.value;aTouch();});
+[['#a-life','life'],['#a-mod','mod'],['#a-red','red']].forEach(([el,k])=>$$(el+' input').forEach(i=>i.addEventListener('change',()=>{i.checked?A[k].add(i.dataset.k):A[k].delete(i.dataset.k);aTouch();})));
+const SEV={mild:['輕度','go'],moderate:['中度','warn'],severe:['重度','stop'],life:['危及生命','stop']};
+let acuteSummary='';
+function renderAcute(){
+  $('#a-pramwrap').hidden=A.age==='adult';
+  const p=AE.acutePlan(A),d=AE.acuteDispo(A),ed=A.setting==='ed';
+  const [lab,cls]=SEV[p.sev];
+  $('#ar-sev').innerHTML=`<span class="pill ${cls}" style="font-size:15px;padding:3px 12px">${lab}</span> <span class="small muted" style="font-family:var(--f-body);font-weight:500">${ed?'急診／急性照護':'基層診所'}</span>`;
+  $('#ar-why').innerHTML=p.why.map(w=>`<li>${esc(w)}</li>`).join('');
+  $('#ar-alerts').innerHTML=p.alerts.map(alertHtml).join('');
+  $('#ar-tx').innerHTML=p.tx.map(t=>`<div class="opt ${t[0]==='go'?'first':t[0]==='stop'?'avoid':'alt'}"><b>${esc(t[1])}</b><div class="small">${esc(t[2])}</div></div>`).join('');
+  $('#ar-ocs').textContent='全身性類固醇：'+p.ocs;
+  $('#a-afterbox').hidden=A.resp==='na';$('#a-admitbox').hidden=!ed;
+  $('#ar-dispo').innerHTML=d.items.map(alertHtml).join('');
+  const showDc=d.decision==='discharge'||A.resp==='na'||(A.resp==='marked'&&d.decision==='observe');
+  $('#ar-dc-card').hidden=!showDc;$('#ar-dcbox').textContent=ed?'Box 9-7':'Box 9-5';
+  const dc=AE.discharge({...A,sev:p.sev});
+  $('#ar-dc').innerHTML=dc.map(x=>`<li>${esc(x)}</li>`).join('');
+  acuteSummary=[`【氣喘急性發作｜GINA 2026】${{adult:'≥18 歲',adol:'12–17 歲',child:'6–11 歲'}[A.age]}${A.wt?'，'+A.wt+' kg':''}，${ed?'急診':'基層'}`,
+    `生命徵象：SpO2 ${A.spo2||'未測'}%、RR ${A.rr||'未測'}/min、PEF/FEV1 ${A.pef||'未測'}%${A.age!=='adult'&&A.pram?'、PRAM '+A.pram:''}`,
+    `嚴重度：${lab}（${p.why.join('；')}）`,
+    '處置：'+p.tx.map(t=>t[1]+'－'+t[2]).join(' / '),
+    '類固醇：'+p.ocs,
+    A.red.size?'高風險因子：'+AE.REDF.filter(([k])=>A.red.has(k)).map(x=>x[1]).join('、'):'',
+    A.resp!=='na'?'1 小時後：'+d.items.map(x=>x[1]+'（'+x[2]+'）').join('；'):''].filter(Boolean).join('\n');
+}
+$('#ar-copy').addEventListener('click',()=>copyText(acuteSummary));
+
+/* ================= init ================= */
+fillTx();fillBio();fillAcute();renderDx();renderTx();renderBio();renderAcute();
+let start='tx';try{const t=localStorage.getItem('asthma-tab');if(TABS.includes(t))start=t;}catch(e){}
+showTab(start);
+})();
 </script>
 </body>
 </html>
