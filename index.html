@@ -728,7 +728,11 @@ function ongoing(m){
   const minStep=t1?2:1;
   if(ctl.level==='well'&&exac===0){
     const stable=num(m.stable)||0;
-    if(stable>=3&&cur>minStep){
+    if(stable>=3&&cur>minStep&&m.preg){
+      out.action='stay';
+      out.why.push('症狀控制良好已 '+stable+' 個月，但懷孕期間不降階');
+      out.cautions.push('維持含 ICS 的治療，每 4–6 週追蹤；產後再評估是否降階');
+    }else if(stable>=3&&cur>minStep){
       out.action='down';
       out.to=(t1&&cur===3)?2:cur-1;
       out.why.push('症狀控制良好已 '+stable+' 個月，過去一年無急性發作');
@@ -1074,8 +1078,8 @@ const CASES=[
  data:[['過去 4 週','四項都沒有（控制良好）'],['目前治療','Track 1 Step 3']],
  ask:'控制良好滿 3 個月，該降階嗎？',
  load:{tab:'tx',age:'adult',ctx:'maint',m:{track:'t1',step:3,c1:'icsform',ctl:{...NOCTL},exac:'0',fev1:'90',stable:'5',checks:{...ALLOK}},risk:['preg']},
- expect:{action:'down',to:2,pregAlert:true},
- points:['不要降階。工具的階梯規則未考慮懷孕，所以標題會顯示「可以降階」，同時跳出懷孕提示；此時以提示為準。','告訴她：含 ICS 的治療對胎兒和她自己都重要。發作與早產、低出生體重及週產期死亡增加有關，ICS 可降低這些風險；ICS 與 β2 促效劑未增加胎兒異常。','每 4–6 週追蹤。若發作，比照未懷孕成人積極治療，避免胎兒缺氧。','若診斷未經客觀證實，等產後再確認，孕期不做支氣管激發試驗。'],
+ expect:{action:'stay',from:3,to:3,pregAlert:true},
+ points:['不要降階。控制良好滿 3 個月本來可以考慮降階，但懷孕不是合適的時機，維持目前的 Step 3，產後再評估。','告訴她：含 ICS 的治療對胎兒和她自己都重要。發作與早產、低出生體重及週產期死亡增加有關，ICS 可降低這些風險；ICS 與 β2 促效劑未增加胎兒異常。','每 4–6 週追蹤。若發作，比照未懷孕成人積極治療，避免胎兒缺氧。','若診斷未經客觀證實，等產後再確認，孕期不做支氣管激發試驗。'],
  trap:'為了「少用藥」而減 ICS。',
  src:'GINA 2026 Summary Guide p.9、27、31'},
 {id:'c6',title:'基層診所的中度發作',tag:'急性發作',
@@ -1125,7 +1129,7 @@ function caseOutcome(c,AE){
     rows.push(['依據',r.why]);
     showRg(l.age,r.step,null);
   }else if(l.tab==='tx'){
-    const o=AE.ongoing({...l.m,age:l.age,icu:(l.risk||[]).includes('icu')});
+    const o=AE.ongoing({...l.m,age:l.age,icu:(l.risk||[]).includes('icu'),preg:(l.risk||[]).includes('preg')});
     const lab={stay:'維持目前治療',down:'可以降階',up:'建議升階',consider:'考慮升階',fix:'先處理可調整因子',severe:'進入重度氣喘評估'}[o.action];
     const ra=AE.riskAlerts(new Set(l.risk||[]),l.m.fev1,l.m.exac);
     Object.assign(f,{action:o.action,from:o.from,to:o.to,next:o.next,pregAlert:ra.some(a=>a[1]==='懷孕')});
@@ -1381,7 +1385,7 @@ function renderTx(){
     alerts.push(['info','2–3 個月後回診','評估反應；控制良好維持 3 個月後可降階。開始前請記錄診斷依據與肺功能。']);
     c1=null;
   }else{
-    const o=AE.ongoing({...S.m,age:S.age,icu:S.risk.has('icu')});
+    const o=AE.ongoing({...S.m,age:S.age,icu:S.risk.has('icu'),preg:S.risk.has('preg')});
     from=o.from;why=o.why.slice();
     const lab={stay:'維持目前治療',down:'可以降階',up:'建議升階',consider:'考慮升階',fix:'先處理可調整因子',severe:'進入重度氣喘評估'}[o.action];
     if(o.action==='fix'){step=o.from;title=lab;sub=`矯正後若仍控制不良，再升至 Step ${o.next}`;}

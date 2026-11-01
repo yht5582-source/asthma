@@ -67,7 +67,16 @@ t('well controlled 3 months, Track 1 Step 3 → down to Steps 1–2', () => {
 t('well controlled 3 months at Track 2 Step 1 → stay, do not stop ICS', () => {
   const o = on({ step: 1, stable: '6' }); assert.equal(o.action, 'stay'); assert.ok(o.cautions.join().includes('ICS'));
 });
-t('well controlled but only 2 months → stay', () => assert.equal(on({ step: 4, stable: '2' }).action, 'stay'));
+t('pregnant, well controlled 5 months → stay, no step-down', () => {
+  const o = on({ track: 't1', step: 3, stable: '5', preg: true });
+  assert.equal(o.action, 'stay'); assert.equal(o.to, 3); assert.ok(o.why.join().includes('懷孕'));
+  assert.equal(on({ step: 4, stable: '5', preg: true }).action, 'stay');
+});
+t('pregnant and uncontrolled can still step up', () => {
+  const o = on({ ctl: ctl(3), preg: true }); assert.equal(o.action, 'up'); assert.equal(o.to, 4);
+});
+t('same patient not pregnant may step down', () => assert.equal(on({ track: 't1', step: 3, stable: '5', preg: false }).action, 'down'));
+t('well controlled but only 2 months → stay',() => assert.equal(on({ step: 4, stable: '2' }).action, 'stay'));
 t('step-down with low FEV1 carries caution', () => assert.ok(on({ step: 4, stable: '4', fev1: '55' }).cautions.length > 0));
 t('child Step 1 AIR (ICS-formoterol) uncontrolled → Step 3 MART', () => assert.equal(on({ age: 'child', step: 1, c1: 'icsform', ctl: ctl(3) }).to, 3));
 t('child Step 1 ICS-SABA uncontrolled → Step 2', () => assert.equal(on({ age: 'child', step: 1, c1: 'combo', ctl: ctl(3) }).to, 2));
