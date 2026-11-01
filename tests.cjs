@@ -165,5 +165,100 @@ t('discharge: child follow-up 2–5 days; adult 2–7 days', () => {
 });
 t('discharge: prior OCS exacerbation → refer', () => assert.ok(AE.discharge(ac({ prior: true, sev: 'moderate' })).join().includes('轉介專科')));
 
+console.log('Teaching tabs: cases, quiz, mind map');
+const tm = html.match(/\/\*CASES-START\*\/([\s\S]*?)\/\*MAP-END\*\//);
+if (!tm) throw new Error('teaching block not found');
+const { CASES, caseOutcome, QUIZ, MAP } = new Function(tm[1] + ';return {CASES,caseOutcome,QUIZ,MAP};')();
+const sub = (a, e, label) => { for (const k of Object.keys(e)) assert.deepEqual(a[k], e[k], `${label}.${k}: ${JSON.stringify(a[k])} ≠ ${JSON.stringify(e[k])}`); };
+t('8 cases with unique ids and full content', () => {
+  assert.equal(CASES.length, 8);
+  assert.equal(new Set(CASES.map(c => c.id)).size, 8);
+  for (const c of CASES) for (const k of ['title', 'story', 'ask', 'trap', 'src']) assert.ok(c[k], `${c.id} lacks ${k}`);
+  for (const c of CASES) assert.ok(c.points.length >= 3, c.id);
+});
+for (const c of CASES) t(`case ${c.id} matches the engine`, () => {
+  const { facts: f, rows } = caseOutcome(c, AE);
+  assert.ok(rows.length >= 2);
+  const { ocsHas, dcHas, txHas, warnHas, gina, nhi, ...plain } = c.expect;
+  sub(f, plain, c.id);
+  if (ocsHas) assert.ok(f.ocs.includes(ocsHas), f.ocs);
+  if (dcHas) assert.ok(f.dc.includes(dcHas), f.dc);
+  if (txHas) assert.ok(f.tx.includes(txHas), f.tx);
+  if (warnHas) assert.ok(f.warn.includes(warnHas), f.warn);
+  if (gina) sub(f.gina, gina, c.id + '.gina');
+  if (nhi) sub(f.nhi, nhi, c.id + '.nhi');
+});
+t('case 1 narrative numbers = computed BDR', () => {
+  const { facts: f } = caseOutcome(CASES[0], AE);
+  assert.equal(f.bdrMl, 320); assert.equal(f.bdrPct, 13.9);
+  assert.ok(CASES[0].points[0].includes('+320 mL') && CASES[0].points[0].includes('+13.9%'));
+});
+t('cases cover every decision tab, the child path and NHI', () => {
+  for (const tab of ['tx', 'acute', 'bio']) assert.ok(CASES.some(c => c.load.tab === tab), tab);
+  assert.ok(CASES.some(c => c.load.age === 'child'));
+  assert.ok(CASES.some(c => c.tw));
+});
+t('case load values only use chips and options the tool offers', () => {
+  const life = AE.LIFE.map(x => x[0]), mod = AE.MODF.map(x => x[0]), red = AE.REDF.map(x => x[0]), risk = AE.RISK.map(x => x[0]);
+  for (const c of CASES) {
+    (c.load.risk || []).forEach(k => assert.ok(risk.includes(k), k));
+    if (c.load.a) { c.load.a.life.forEach(k => assert.ok(life.includes(k), k)); c.load.a.mod.forEach(k => assert.ok(mod.includes(k), k)); c.load.a.red.forEach(k => assert.ok(red.includes(k), k)); }
+    if (c.load.b) c.load.b.feat.forEach(k => assert.ok(html.includes(`['${k}',`), k));
+  }
+});
+t('20 questions: 10 basic + 10 advanced, 4 options, valid answer and source', () => {
+  assert.equal(QUIZ.length, 20);
+  assert.equal(QUIZ.filter(q => q.level === 'basic').length, 10);
+  assert.equal(QUIZ.filter(q => q.level === 'adv').length, 10);
+  assert.equal(new Set(QUIZ.map(q => q.stem)).size, 20);
+  for (const q of QUIZ) {
+    assert.equal(q.opts.length, 4, q.id); assert.equal(new Set(q.opts).size, 4, q.id);
+    assert.ok(Number.isInteger(q.ans) && q.ans >= 0 && q.ans < 4, q.id);
+    assert.ok(q.why && q.src && q.topic, q.id);
+  }
+});
+t('the correct option is not a giveaway by length', () => {
+  // Clearly longest = more than 10% longer than every wrong option.
+  const longest = QUIZ.filter(q => q.opts[q.ans].length > 1.1 * Math.max(...q.opts.filter((_, i) => i !== q.ans).map(o => o.length)));
+  assert.ok(longest.length <= 2, `correct option is clearly longest in ${longest.map(q => q.id)}`);
+});
+const Qid = id => QUIZ.find(q => q.id === id), right = id => Qid(id).opts[Qid(id).ans];
+t('q2: 2 items = partly controlled', () => { assert.equal(AE.control({ day: true, night: true }).label, right('q2')); });
+t('q8: moderate per engine', () => { assert.equal(sev({ speech: 'phr', spo2: '93', rr: '26', pef: '60' }), 'moderate'); assert.equal(right('q8'), '中度'); });
+t('q12: child step-up from ICS-formoterol goes to Step 3 with 80/4.5', () => {
+  assert.equal(on({ age: 'child', step: 1, c1: 'icsform', ctl: ctl(3) }).to, 3);
+  assert.ok(kidText(3).includes('80/4.5 mcg 每日 1 吸') && right('q12').includes('80/4.5'));
+});
+t('q15: anaphylaxis → epinephrine first', () => { assert.ok(/epinephrine/.test(AE.acutePlan(ac({ ana: true, spo2: '89' })).tx[0][1])); assert.ok(right('q15').includes('epinephrine')); });
+t('q16: PEF 65 blocks discharge', () => assert.equal(AE.acuteDispo(ac({ setting: 'pc', resp: 'marked', mildAfter: true, home: true, spo2b: '94', pefb: '65' })).decision, 'observe'));
+const q18 = nh({ age: '45', exac: '2', er: true, ocs: '0', ocsm: '0', eos: '110', ige: '40', feat: new Set(['nosens']), sensKnown: true, ctlN: 2 });
+t('q18: only tezepelumab meets NHI; GINA agrees', () => {
+  assert.deepEqual(q18, { oma: 'n', mepo: 'n', benra: 'n', dupi: 'n', teze: 'y' });
+  const g = Object.fromEntries(bg({ age: '45', exac: '2', eos: '110', feno: '15', ige: '40', feat: new Set(['nosens']), sensKnown: true }).classes.map(c => [c.k, c.ok]));
+  assert.deepEqual(g, { ige: false, il5: false, il4: false, tslp: true });
+  assert.equal(right('q18'), 'Tezepelumab');
+});
+t('q19: age 16 with 2 months OCS', () => {
+  const r = nh({ age: '16', eos: '350', ocs: '5', ocsm: '2', exac: '2', er: true });
+  assert.equal(r.mepo, 'y'); assert.equal(r.dupi, 'y'); assert.equal(r.benra, 'n'); assert.equal(r.teze, 'n');
+});
+t('q20: Eos 1620 raises the EGPA warning and fails the anti-IL4Rα class', () => {
+  const r = bg({ eos: '1620' });
+  assert.ok(r.warn.map(x => x[2]).join().includes('EGPA'));
+  assert.equal(cls(r, 'il4').ok, false);
+});
+t('mind map has both sides; NHI leaves are tagged; key thresholds match the engine and table', () => {
+  assert.ok(MAP.dx.length >= 5 && MAP.tx.length >= 8);
+  const nhiB = MAP.tx.find(b => b.t === '台灣健保');
+  assert.ok(nhiB.l.every(x => x.tw));
+  const others = [...MAP.dx, ...MAP.tx.filter(b => b !== nhiB)].flatMap(b => b.l);
+  assert.ok(others.every(x => !x.tw));
+  const s = JSON.stringify(MAP);
+  for (const x of ['>12 吸', '>8 吸', 'SpO2 ≥92%', 'PEF >70%', '≥12% 且 ≥200 mL', '30–1300', '40–50 mg', '1–2 mg/kg']) assert.ok(s.includes(x), x);
+});
+t('new tabs and panes exist', () => {
+  for (const id of ['cases', 'quiz', 'map']) { assert.ok(html.includes(`id="tab-${id}"`)); assert.ok(html.includes(`<section class="pane" id="${id}"`)); }
+});
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
